@@ -9,6 +9,7 @@ import Jobs from './components/Jobs'
 import AddQuestions from './components/AddQuestions'
 import Results from './components/Results'
 import Login from './components/Login'
+import ViewQuestions from './components/ViewQuestions'
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/send-test" element={<SendTest />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/add-questions" element={<AddQuestions />} />
+            <Route path="/view-questions" element={<ViewQuestions />} />
             <Route path="/results" element={<Results />} />
             <Route path="/login" element={<Login/>} />
 
