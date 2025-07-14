@@ -15,6 +15,7 @@ import ViewMCQ from './ViewMCQ';
 import AddCodingQuestions from './components/AddCodingQuestions';
 import AddMCQ from './components/AddMCQ';
 import AddJob from './components/AddJob';
+import AllUsers from './components/AllUsers';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <main className="content">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/all-users" element={<AllUsers />} />
             <Route path="/add-users" element={<AddUsers />} />
             <Route path="/send-test" element={<SendTest />} />
             <Route path="/jobs" element={<Jobs />} />

@@ -57,6 +57,7 @@ const AddUser: React.FC = () => {
             onChange={handleChange}
           >
             <option value="">Select Role</option>
+            <option value="SA">SA</option>
             <option value="TA">TA</option>
             <option value="TM">TM</option>
           </select>

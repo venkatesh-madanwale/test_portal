@@ -10,6 +10,7 @@ const Navbar = () => {
       </div>
       <div className="navbar__center">
         <ul className="navbar__links">
+          <li><Link to="/all-users">All Users</Link></li>
           <li><Link to="/add-users">Add Users</Link></li>
           <li><Link to="/send-test">Send Test</Link></li>
           <li><Link to="/jobs">Jobs</Link></li> 
@@ -20,6 +21,7 @@ const Navbar = () => {
       </div>
       <div className="navbar__right">
         <button className="navbar__btn"><Link to="/login">Log in</Link></button>
+        <button className="navbar__btn"><Link to="">Log out</Link></button>
       </div>
     </nav>
   );
