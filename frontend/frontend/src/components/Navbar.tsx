@@ -20,8 +20,8 @@ const Navbar = () => {
         </ul>
       </div>
       <div className="navbar__right">
-        <button className="navbar__btn"><Link to="/login">Log in</Link></button>
-        <button className="navbar__btn"><Link to="">Log out</Link></button>
+        <button className="navbar__btn"><Link to="/login" className='btn'>Log in</Link></button>
+        {/* <button className="navbar__btn"><Link to="" className='btn'>Log out</Link></button> */}
       </div>
     </nav>
   );

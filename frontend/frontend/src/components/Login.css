@@ -2,8 +2,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 3rem 2rem;
-  min-height: 70vh;
+  padding: 1rem 2rem;
+  min-height: 40vh;
   box-sizing: border-box;
 }
 
