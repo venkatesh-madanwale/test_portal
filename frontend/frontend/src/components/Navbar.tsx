@@ -4,7 +4,9 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar__left">
+        <Link to="/">
         <img src="src/assets/mirafraLogo.svg" alt="Logo" className="navbar__logo" />
+        </Link>
       </div>
       <div className="navbar__center">
         <ul className="navbar__links">

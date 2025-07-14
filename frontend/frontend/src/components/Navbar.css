@@ -42,7 +42,7 @@
 }
 
 .navbar__links li a:hover {
-    color: #0070f3;
+    color: green;
 }
 
 .navbar__right {
@@ -52,19 +52,21 @@
 
 .navbar__btn {
     padding: 8px 16px;
-    border: 1px solid #0070f3;
+    border: 1px solid green;
     background-color: transparent;
-    color: #0070f3;
+    color: green;
     border-radius: 4px;
     font-weight: 500;
     cursor: pointer;
+    text-decoration: none;
 }
 
 .navbar__btn--primary {
-    background-color: #0070f3;
-    color: white;
+    background-color: green;
+    color: green;
 }
 
 .navbar__btn:hover {
     opacity: 0.85;
+    color: green;
 }

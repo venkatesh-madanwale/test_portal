@@ -7,9 +7,8 @@
 }
 
 html, body, #root {
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
+  height: 100%;
+  width: 100%;
   font-family: sans-serif;
 }
 
@@ -17,29 +16,12 @@ html, body, #root {
 .app-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
 }
 
-/* Fixed navbar and footer */
-.fixed-navbar {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
-}
-
-.fixed-footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  z-index: 1000;
-}
-
-/* Main content area */
+/* Main content area grows to push footer to bottom */
 .content {
   flex: 1;
-  margin-top: 15vh;  /* height of your navbar */
-  margin-bottom: 40vh; /* height of your footer */
-  overflow-y: auto;
   padding: 20px;
+  overflow-y: auto;
 }
