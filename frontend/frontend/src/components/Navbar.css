@@ -62,8 +62,8 @@
 }
 
 
-.navbar__btn--primary {
-    background-color: green;
+.navbar__btn {
+    background-color: white;
     color: green;
 }
 
@@ -78,5 +78,5 @@
 }
 .btn:hover {
     opacity: 0.85;
-    color: green;
+    color: white;
 }

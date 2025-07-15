@@ -2,6 +2,10 @@
   text-align: left;
   padding: 1rem;
   font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .button-container {
