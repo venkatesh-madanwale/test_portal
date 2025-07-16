@@ -6,8 +6,8 @@
 }
 
 .footer {
-  width: 100vw;         /* Full viewport width */
-  height: 40vh;          /* 40% of viewport height */
+  width: auto;
+  height: 45vh;
   background-color: #f7f7f7;
   font-family: sans-serif;
   color: #333;
