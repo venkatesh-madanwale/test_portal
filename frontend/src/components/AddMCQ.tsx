@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './AddMCQ.css';
 import axios from 'axios';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 const AddMCQ = () => {
   const [formData, setFormData] = useState({
@@ -60,16 +61,83 @@ const AddMCQ = () => {
     }
   };
 
-  const handleUploadClick = () => {
-    alert('Upload XLSX clicked (dummy)');
+
+
+  const handleUploadClick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      const data = evt.target?.result;
+      const workbook = XLSX.read(data, { type: 'binary' });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const createdBy = user?.id || '';
+
+      const mcqPayloads = (jsonData as any[]).map((row) => {
+        const answerKeys = String(row.answerKey).split(',').map((key) => key.trim().toLowerCase());
+        return {
+          skill: row.skill,
+          difficulty: row.difficulty,
+          questionTitle: row.questionTitle,
+          createdBy,
+          options: [
+            {
+              optionText: row.optionA,
+              isCorrect: answerKeys.includes('a'),
+            },
+            {
+              optionText: row.optionB,
+              isCorrect: answerKeys.includes('b'),
+            },
+            {
+              optionText: row.optionC,
+              isCorrect: answerKeys.includes('c'),
+            },
+            {
+              optionText: row.optionD,
+              isCorrect: answerKeys.includes('d'),
+            },
+          ],
+        };
+      });
+
+      // POST each question
+      try {
+        const responses = await Promise.all(
+          mcqPayloads.map((payload) =>
+            axios.post('http://localhost:3000/mcq-questions', payload)
+          )
+        );
+        toast.success(`${responses.length} questions uploaded successfully!`);
+      } catch (err) {
+        console.error('Upload failed:', err);
+        toast.error('Failed to upload questions.');
+      }
+    };
+
+    reader.readAsBinaryString(file);
   };
+
 
   return (
     <div className="mcq-container">
-      <h2>Add MCQ Question...</h2>
-
-      <div className="upload-button">
-        <button onClick={handleUploadClick}>Upload xlsx</button>
+      <h2>Add MCQ Question</h2>
+      <div className="btnn">
+          <label htmlFor="xlsxUpload" className="upload-label">Upload XLSX</label>
+          <input
+            id="xlsxUpload"
+            type="file"
+            accept=".xlsx, .xls"
+            onChange={handleUploadClick}
+            hidden
+          />
+        <a href="src/assets/template.xlsx" download>
+          <button type="button" className="upload-label">Download Template</button>
+        </a>
       </div>
 
       <form onSubmit={handleSubmit}>

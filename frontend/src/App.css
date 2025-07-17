@@ -13,9 +13,6 @@ html, body, #root {
   width: 100%;
 }
 
-
-
-
 /* App wrapper: vertical stacking */
 .app-container {
   display: flex;

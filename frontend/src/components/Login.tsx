@@ -30,7 +30,7 @@ const Login: React.FC = () => {
   if (loginUser.fulfilled.match(resultAction)) {
     // alert('Login successful!');
     toast.success('Login successful!');
-    navigate('/dashboard');
+    navigate('/');
   } else {
     console.error('Login failed:', resultAction.payload);
     toast.error('Login failed!');
