@@ -4,18 +4,21 @@ import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../redux/slices/authSlice';
 import { fetchRoles } from '../redux/slices/rolesSlice';
 import type { RootState } from '../redux/store';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const AddUser: React.FC = () => {
   const dispatch = useDispatch<any>();
-
+  const navigate = useNavigate()
   const { roles, loading: roleLoading, error } = useSelector((state: RootState) => state.roles);
 
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     phone: '',
-    role: '', // role name
+    roleId: '', // role id
     password: '',
+    status: ''
   });
 
   useEffect(() => {
@@ -29,25 +32,30 @@ const AddUser: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    const selectedRole = roles.find(r => r.name === formData.role);
-    if (!selectedRole) {
-      alert('Invalid role selected.');
-      return;
+  if (!formData.roleId) {
+    toast.error('Please select a role');
+    return;
+  }
+
+  try {
+    const result = await dispatch(registerUser(formData));
+
+    if (registerUser.fulfilled.match(result)) {
+      toast.success('User registered successfully!');
+      navigate('/');
+    } else {
+      toast.error('Registration failed: ' + (result.payload || 'Unknown error'));
     }
+  } catch (error) {
+    alert('An unexpected error occurred');
+    console.error(error);
+  }
+};
 
-    dispatch(
-      registerUser({
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        password: formData.password,
-        role: selectedRole.id, // send UUID
-      })
-    );
-  };
+
 
   return (
     <div className="add-user-container">
@@ -58,9 +66,9 @@ const AddUser: React.FC = () => {
         <form className="user-form" onSubmit={handleSubmit}>
           <input
             type="text"
-            name="fullName"
+            name="name"
             placeholder="Full Name:"
-            value={formData.fullName}
+            value={formData.name}
             onChange={handleChange}
             required
           />
@@ -80,13 +88,19 @@ const AddUser: React.FC = () => {
             onChange={handleChange}
             required
           />
-          <select name="role" value={formData.role} onChange={handleChange} required>
+          <select name="roleId" value={formData.roleId} onChange={handleChange} required>
             <option value="">Select Role</option>
             {roles.map(role => (
-              <option key={role.id} value={role.name}>
+              <option key={role.id} value={role.id}>
                 {role.name}
               </option>
             ))}
+          </select>
+
+          <select name="status" value={formData.status} onChange={handleChange} required>
+            <option value="">Select Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inctive</option>
           </select>
 
           <input

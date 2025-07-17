@@ -42,16 +42,17 @@ export const registerUser = createAsyncThunk(
   'auth/register',
   async (
     formData: {
-      fullName: string;
+      name: string;
       email: string;
       phone: string;
-      role: string;
+      roleId: string;
       password: string;
+      status: string;
     },
     thunkAPI
   ) => {
     try {
-      const response = await axios.post('http://localhost:3000/auth/register', formData);
+      const response = await axios.post('http://localhost:3000/users', formData);
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data?.message || 'Registration failed');

@@ -3,8 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../redux/slices/authSlice';
 import type { RootState } from '../redux/store';
 import './Login.css';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+
 
 const Login: React.FC = () => {
+  const navigate = useNavigate()
   const dispatch = useDispatch<any>();
   const authState = useSelector((state: RootState) => state.auth);
 
@@ -18,10 +22,21 @@ const Login: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(loginUser(formData));
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const resultAction = await dispatch(loginUser(formData));
+
+  if (loginUser.fulfilled.match(resultAction)) {
+    // alert('Login successful!');
+    toast.success('Login successful!');
+    navigate('/dashboard');
+  } else {
+    console.error('Login failed:', resultAction.payload);
+    toast.error('Login failed!');
+  }
+};
+
 
   return (
     <div className="login-container">
