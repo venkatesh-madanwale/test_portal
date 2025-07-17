@@ -6,11 +6,11 @@ export const getTypeOrmConfig = (
   configService: ConfigService,
 ): TypeOrmModuleOptions => ({
   type: 'postgres',
-  host: configService.get<string>('DB_HOST') || "database-1.cxoos2mao5q1.ap-south-1.rds.amazonaws.com",
-  port: parseInt(configService.get<string>('DB_PORT')!, 10) || 5432,
-  username: configService.get<string>('DB_USERNAME') || "sharathm",
-  password: configService.get<string>('DB_PASSWORD') || "0bvlylvBhhPecaURsh1n",
-  database: configService.get<string>('DB_NAME') || "master_db",
+  host: configService.get<string>('DB_HOST'),
+  port: parseInt(configService.get<string>('DB_PORT')!, 10),
+  username: configService.get<string>('DB_USERNAME'),
+  password: configService.get<string>('DB_PASSWORD'),
+  database: configService.get<string>('DB_NAME'),
   ssl: {
     rejectUnauthorized: false,
   },

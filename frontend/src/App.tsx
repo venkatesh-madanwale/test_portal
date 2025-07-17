@@ -16,6 +16,7 @@ import AddCodingQuestions from './components/AddCodingQuestions';
 import AddMCQ from './components/AddMCQ';
 import AddJob from './components/AddJob';
 import AllUsers from './components/AllUsers';
+import Logout from './components/Logout';
 
 function App() {
   return (
@@ -39,6 +40,8 @@ function App() {
             <Route path="/view-coding" element={<ViewCoding />} />
             <Route path="/results" element={<Results />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/logout" element={<Logout />} />
+
           </Routes>
         </main>
 

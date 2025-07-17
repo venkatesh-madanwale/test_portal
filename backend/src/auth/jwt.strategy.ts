@@ -13,7 +13,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       // If token is expired, throw error.
       ignoreExpiration: false,
       // Verify the token signature
-      secretOrKey: configService.get<string>('JWT_SECRET_KEY') || "bwb34ewr3b4jhd87",
+      secretOrKey: configService.get<string>('JWT_SECRET_KEY'),
     });
   }
 

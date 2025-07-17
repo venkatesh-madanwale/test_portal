@@ -8,7 +8,7 @@ import {
   IsUUID,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 enum DifficultyLevel {
   EASY = 'easy',
@@ -28,6 +28,7 @@ class CreateOptionDto {
 export class CreateMcqQuestionDto {
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => value.toLowerCase())
   skill: string; // Can be skill name or UUID based on backend logic
 
   @IsString()

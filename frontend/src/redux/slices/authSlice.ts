@@ -69,6 +69,9 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.error = null;
+      // Remove from localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     },
   },
   extraReducers: builder => {
@@ -81,6 +84,8 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.data;
         state.token = action.payload.access_token;
+        localStorage.setItem('token', action.payload.access_token);
+        localStorage.setItem('user', JSON.stringify(action.payload.data));
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -90,18 +95,18 @@ const authSlice = createSlice({
 
 
       .addCase(registerUser.pending, state => {
-    state.loading = true;
-    state.error = null;
-  })
-  .addCase(registerUser.fulfilled, (state, action) => {
-    state.loading = false;
-    // Optional: auto-login or show success
-    state.error = action.payload as string;
-  })
-  .addCase(registerUser.rejected, (state, action) => {
-    state.loading = false;
-    state.error = action.payload as string;
-  });
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.loading = false;
+        // Optional: auto-login or show success
+        state.error = action.payload as string;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 

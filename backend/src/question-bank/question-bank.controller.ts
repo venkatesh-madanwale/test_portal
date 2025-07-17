@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { QuestionBankService } from './question-bank.service';
 import { CreateMcqQuestionDto } from './dto/create-mcq-question.dto';
 
-@Controller('question-bank')
+@Controller('mcq-questions')
 export class QuestionBankController {
   constructor(private readonly questionBankService: QuestionBankService) {}
 
