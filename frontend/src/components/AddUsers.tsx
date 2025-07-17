@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './AddUsers.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser } from '../redux/slices/authSlice';
+import { fetchRoles } from '../redux/slices/rolesSlice';
+import type { RootState } from '../redux/store';
 
 const AddUser: React.FC = () => {
+  const dispatch = useDispatch<any>();
+
+  const { roles, loading: roleLoading, error } = useSelector((state: RootState) => state.roles);
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
-    role: '',
+    role: '', // role name
     password: '',
   });
+
+  useEffect(() => {
+    dispatch(fetchRoles());
+  }, [dispatch]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -19,8 +31,22 @@ const AddUser: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // API Logic
+
+    const selectedRole = roles.find(r => r.name === formData.role);
+    if (!selectedRole) {
+      alert('Invalid role selected.');
+      return;
+    }
+
+    dispatch(
+      registerUser({
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        role: selectedRole.id, // send UUID
+      })
+    );
   };
 
   return (
@@ -36,6 +62,7 @@ const AddUser: React.FC = () => {
             placeholder="Full Name:"
             value={formData.fullName}
             onChange={handleChange}
+            required
           />
           <input
             type="email"
@@ -43,6 +70,7 @@ const AddUser: React.FC = () => {
             placeholder="Email Id:"
             value={formData.email}
             onChange={handleChange}
+            required
           />
           <input
             type="tel"
@@ -50,16 +78,15 @@ const AddUser: React.FC = () => {
             placeholder="Phone No.:"
             value={formData.phone}
             onChange={handleChange}
+            required
           />
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-          >
+          <select name="role" value={formData.role} onChange={handleChange} required>
             <option value="">Select Role</option>
-            <option value="SA">SA</option>
-            <option value="TA">TA</option>
-            <option value="TM">TM</option>
+            {roles.map(role => (
+              <option key={role.id} value={role.name}>
+                {role.name}
+              </option>
+            ))}
           </select>
 
           <input
@@ -68,9 +95,12 @@ const AddUser: React.FC = () => {
             placeholder="Password:"
             value={formData.password}
             onChange={handleChange}
+            required
           />
           <button type="submit">Register</button>
         </form>
+        {roleLoading && <p>Loading roles...</p>}
+        {error && <p className="error">{error}</p>}
       </div>
 
       <div className="image-section">

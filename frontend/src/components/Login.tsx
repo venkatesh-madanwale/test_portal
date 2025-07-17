@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from '../redux/slices/authSlice';
+import type { RootState } from '../redux/store';
 import './Login.css';
 
 const Login: React.FC = () => {
+  const dispatch = useDispatch<any>();
+  const authState = useSelector((state: RootState) => state.auth);
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -14,16 +20,13 @@ const Login: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Logging in with:', formData);
-    // Add your auth logic here
+    dispatch(loginUser(formData));
   };
 
   return (
     <div className="login-container">
       <div className="login-form-section">
-        <h2>
-          Log in to <span className="highlight">mirafra</span>
-        </h2>
+        <h2>Log in to <span className="highlight">mirafra</span></h2>
         <form className="login-form" onSubmit={handleSubmit}>
           <input
             type="email"
@@ -41,17 +44,14 @@ const Login: React.FC = () => {
             onChange={handleChange}
             required
           />
-          <button type="submit">Log in</button>
+          <button type="submit" disabled={authState.loading}>
+            {authState.loading ? 'Logging in...' : 'Log in'}
+          </button>
+          {authState.error && <p className="error">{authState.error}</p>}
         </form>
-        <hr className="divider" />
       </div>
-
       <div className="login-image-section">
-        <img
-          src="src/assets/add-user-placeholder.png"
-          alt="login-placeholder"
-          className="login-graphic"
-        />
+        <img src="src/assets/add-user-placeholder.png" alt="login-placeholder" className="login-graphic" />
       </div>
     </div>
   );

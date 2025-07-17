@@ -17,15 +17,12 @@ export class UsersService {
   ) {}
 
   async createUser(createUserDto: CreateUserDto) {
-    const { name, email, phone, password, roleId } = createUserDto;
+    const { name, email, phone, password, status, roleId } = createUserDto;
 
     const existingUser = await this.userRepo.findOne({ where: { email } });
     if (existingUser) {
       throw new BadRequestException('User with this email already exists.');
     }
-
-    // Hash the password - salt number(10)
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Fetch the role entity
     const role = await this.roleRepo.findOne({ where: { id: roleId } });
@@ -33,12 +30,16 @@ export class UsersService {
       throw new BadRequestException('Invalid role ID.');
     }
 
+    // Hash the password - salt number(10)
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = this.userRepo.create({
       name,
       email,
       phone,
       hashedPassword,
-      roleId,
+      role,
+      status,
     });
 
     const savedUser = await this.userRepo.save(newUser);
@@ -47,13 +48,14 @@ export class UsersService {
 
   async getAllUser() {
     const users = await this.userRepo
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.role', 'role')
+      .createQueryBuilder('user') // This is your LEFT table
+      .leftJoinAndSelect('user.role', 'role') // RIGHT table is 'role'
       .select([
         'user.id',
         'user.name',
         'user.email',
         'user.phone',
+        'user.status',
         'user.createdAt',
         'role.name',
       ])
@@ -65,6 +67,7 @@ export class UsersService {
       email: user.email,
       phone: user.phone,
       role: user.role.name,
+      status: user.status,
       createdAt: user.createdAt,
     }));
   }

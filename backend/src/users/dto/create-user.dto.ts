@@ -6,7 +6,13 @@ import {
   MinLength,
   MaxLength,
   Matches,
+  IsEnum,
 } from 'class-validator';
+
+enum UserStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
 
 export class CreateUserDto {
   @IsString()
@@ -26,6 +32,11 @@ export class CreateUserDto {
       'Password must include uppercase, lowercase, number, and special character',
   })
   password: string;
+
+  @IsEnum(UserStatus, {
+    message: 'Status must be either active or inactive',
+  })
+  status: UserStatus;
 
   @IsUUID()
   roleId: string;

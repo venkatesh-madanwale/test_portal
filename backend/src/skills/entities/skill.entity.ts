@@ -1,15 +1,15 @@
+import { McqQuestion } from 'src/question-bank/entities/question.entity';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  OneToMany,
   CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 
-@Entity('roles')
-export class Role {
+@Entity('skills')
+export class Skill {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -22,7 +22,8 @@ export class Role {
   @UpdateDateColumn({ name: 'modified_at' })
   modifiedAt: Date;
 
-  // This will not create a separate column, its just virtual mapping for reverse traversal
-  @OneToMany(() => User, (user) => user.role, { cascade: true })
-  users: User[];
+  @OneToMany(() => McqQuestion, (mcqQuestion) => mcqQuestion.skill, {
+    cascade: true,
+  })
+  mcqQuestions: McqQuestion[];
 }
