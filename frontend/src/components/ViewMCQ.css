@@ -107,11 +107,15 @@
 
 .pagination {
     display: flex;
+    flex-wrap: wrap; /* allow wrapping */
     justify-content: center;
     gap: 10px;
     margin-top: 2rem;
+    max-width: 100%;      /* prevent overflow */
+    overflow-x: auto;     /* horizontal scroll if needed */
+    padding: 0 1rem;      /* spacing from sides */
+    box-sizing: border-box;
 }
-
 .pagination button {
     padding: 6px 12px;
     border: none;

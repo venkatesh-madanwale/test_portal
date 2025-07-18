@@ -73,6 +73,7 @@ const AddMCQ = () => {
       const workbook = XLSX.read(data, { type: 'binary' });
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      console.log(worksheet)
 
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const createdBy = user?.id || '';

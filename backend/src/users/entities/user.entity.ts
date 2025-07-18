@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Role } from './role.entity';
 import { McqQuestion } from 'src/question-bank/entities/question.entity';
+import { Job } from 'src/jobs/entities/job.entity';
 
 @Entity('users')
 export class User {
@@ -50,6 +51,9 @@ export class User {
     cascade: true,
   })
   mcqQuestions: McqQuestion[];
+
+  @OneToMany(() => Job, (job) => job.createdBy)
+  job: Job[];
 }
 
 //   // Only FOREIGN KEY establish

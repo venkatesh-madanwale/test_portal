@@ -13,6 +13,7 @@ interface AuthState {
   token: string | null;
   loading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
 }
 
 const initialState: AuthState = {
@@ -20,6 +21,7 @@ const initialState: AuthState = {
   token: null,
   loading: false,
   error: null,
+  isAuthenticated: false,
 };
 
 // LOGIN THUNK
@@ -35,9 +37,7 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-
-
-// ADDUSER THUNK
+// REGISTER THUNK
 export const registerUser = createAsyncThunk(
   'auth/register',
   async (
@@ -60,7 +60,6 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -69,7 +68,7 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.error = null;
-      // Remove from localStorage
+      state.isAuthenticated = false;
       localStorage.removeItem('token');
       localStorage.removeItem('user');
     },
@@ -84,15 +83,15 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.data;
         state.token = action.payload.access_token;
+        state.isAuthenticated = true;
         localStorage.setItem('token', action.payload.access_token);
         localStorage.setItem('user', JSON.stringify(action.payload.data));
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+        state.isAuthenticated = false;
       })
-
-
 
       .addCase(registerUser.pending, state => {
         state.loading = true;
@@ -100,7 +99,6 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
-        // Optional: auto-login or show success
         state.error = action.payload as string;
       })
       .addCase(registerUser.rejected, (state, action) => {

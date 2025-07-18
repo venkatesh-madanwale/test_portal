@@ -30,10 +30,11 @@
 
 /* Title */
 .add-job-title {
-  font-size: 1.8rem;
+  font-size: 2rem;
   color: #158c2b;
   font-weight: 600;
   margin-bottom: 2rem;
+  padding: 1em 1em 1em 1em;
 }
 
 /* Form layout */
@@ -76,71 +77,3 @@
 .submit-btn:hover {
   background-color: #1f8c3c;
 }
-
-
-/* .add-job-container {
-  max-width: 500px;
-  margin: 3rem auto;
-  padding: 2rem;
-  text-align: center;
-  position: relative;
-}
-
-.upload-btn-container {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin: 1.5rem;
-}
-
-.upload-btn {
-  padding: 10px 16px;
-  background-color: #28c25c;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.upload-btn:hover {
-  background-color: #1ba347;
-}
-
-.add-job-title {
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  text-align: left;
-}
-
-.job-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.job-form input {
-  width: 100%;
-  max-width: 400px;
-  padding: 12px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.submit-btn {
-  padding: 12px 32px;
-  font-size: 1rem;
-  background-color: #28c25c;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.submit-btn:hover {
-  background-color: #1ba347;
-} */
-

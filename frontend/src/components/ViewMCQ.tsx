@@ -31,7 +31,7 @@ const ViewMCQ: React.FC = () => {
   const [skillFilter, setSkillFilter] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
 
   useEffect(() => {
     axios

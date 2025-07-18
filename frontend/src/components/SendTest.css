@@ -3,6 +3,7 @@
   flex-direction: column;
   align-items: center;
   padding: 2rem;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 .send-link-container h2 {
@@ -11,13 +12,15 @@
   font-size: 1.5rem;
 }
 
-form {
+/* Scoped form */
+.send-link-form {
   display: flex;
   flex-direction: column;
   width: 300px;
 }
 
-input {
+/* Scoped input */
+.send-link-input {
   border-radius: 6px;
   margin: 8px 0;
   padding: 12px;
@@ -29,11 +32,12 @@ input {
   transition: border-bottom 0.3s ease;
 }
 
-input:focus {
+.send-link-input:focus {
   border-bottom: 2px solid green;
 }
 
-button {
+/* Scoped button */
+.send-link-button {
   margin-top: 16px;
   padding: 12px;
   font-size: 16px;
@@ -45,6 +49,6 @@ button {
   transition: background 0.3s ease;
 }
 
-button:hover {
+.send-link-button:hover {
   background-color: #218838;
 }
