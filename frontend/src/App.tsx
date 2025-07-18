@@ -41,7 +41,6 @@ function App() {
             <Route path="/results" element={<Results />} />
             <Route path="/login" element={<Login />} />
             <Route path="/logout" element={<Logout />} />
-
           </Routes>
         </main>
 

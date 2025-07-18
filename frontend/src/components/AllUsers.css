@@ -15,16 +15,16 @@
   color: #333;
 }
 
-.table-responsive {
+.all-users-table-responsive {
   overflow-x: auto;
 }
 
-.user-table {
+.all-users-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.user-table thead th {
+.all-users-table thead th {
   background-color: #f3f4f6;
   padding: 10px;
   text-align: left;
@@ -34,7 +34,7 @@
   position: relative;
 }
 
-.user-table thead input {
+.all-users-table thead input {
   width: 90%;
   padding: 6px;
   margin-top: 4px;
@@ -43,16 +43,16 @@
   border-radius: 6px;
 }
 
-.user-table tbody td {
+.all-users-table tbody td {
   padding: 10px;
   font-size: 0.9rem;
   border-bottom: 1px solid #eee;
 }
 
-.user-table tbody tr:nth-child(even) {
+.all-users-table tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-.user-table tbody tr:hover {
+.all-users-table tbody tr:hover {
   background-color: #eef6ff;
 }

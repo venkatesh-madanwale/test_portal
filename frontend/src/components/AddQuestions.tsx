@@ -7,7 +7,7 @@ const AddQuestions: React.FC = () => {
 
   return (
     <div className="add-questions-container">
-      <h2>Add the questions...</h2>
+      <h2>Add the questions</h2>
       <div className="button-container">
         <button className="question-button" onClick={() => navigate('/add-mcq')}>
           <div className="icon">McQ</div>

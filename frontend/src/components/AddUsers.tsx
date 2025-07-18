@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 const AddUser: React.FC = () => {
   const dispatch = useDispatch<any>();
   const navigate = useNavigate()
-  const { roles, loading: roleLoading, error } = useSelector((state: RootState) => state.roles);
+  // const { roles, loading: roleLoading, error } = useSelector((state: RootState) => state.roles);
+  const { roles, loading: roleLoading } = useSelector((state: RootState) => state.roles);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -114,7 +115,7 @@ const AddUser: React.FC = () => {
           <button type="submit">Register</button>
         </form>
         {roleLoading && <p>Loading roles...</p>}
-        {error && <p className="error">{error}</p>}
+        {/* {error && <p className="error">{error}</p>} */}
       </div>
 
       <div className="image-section">
