@@ -104,11 +104,6 @@ export class ApplicantQuestionService {
 
 
 
-
-
-
-
-
   // 5. Evaluate test
   async evaluateTest(applicantId: string, attemptId: string) {
     console.log('Evaluating MCQ test...');

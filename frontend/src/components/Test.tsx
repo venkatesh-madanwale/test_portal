@@ -114,21 +114,46 @@ const Test = () => {
     }
   };
 
-  const handleSubmit = () => {
-    let calculatedScore = 0;
-    questions.forEach((q) => {
-      const selectedOptionId = answers[q.mcq_question.id];
-      const correctOption = q.mcq_question.options.find((opt) => opt.isCorrect);
-      if (selectedOptionId === correctOption?.id) {
-        calculatedScore += 1;
-      }
-    });
-    setScore(calculatedScore);
+  // const handleSubmit = () => {
+  //   let calculatedScore = 0;
+  //   questions.forEach((q) => {
+  //     const selectedOptionId = answers[q.mcq_question.id];
+  //     const correctOption = q.mcq_question.options.find((opt) => opt.isCorrect);
+  //     if (selectedOptionId === correctOption?.id) {
+  //       calculatedScore += 1;
+  //     }
+  //   });
+  //   setScore(calculatedScore);
+  //   setSubmitted(true);
+  //   // setTimeout(() => {
+  //   //   window.close();
+  //   // }, 3000); // 3-second delay to allow user to see the result
+  // };
+
+
+  const handleSubmit = async () => {
     setSubmitted(true);
-    // setTimeout(() => {
-    //   window.close();
-    // }, 3000); // 3-second delay to allow user to see the result
+    try {
+      const res = await axios.get(
+        `http://localhost:3000/applicant-questions/evaluate/${applicantId}/${attemptId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log('Evaluation result:', res.data);
+      setScore(res.data.correct); // set score from backend response
+
+      // Optional: Show feedback or save to backend
+    } catch (error) {
+      console.error('Error evaluating test:', error);
+    }
   };
+
+
+
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
