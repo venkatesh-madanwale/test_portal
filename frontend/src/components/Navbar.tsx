@@ -9,7 +9,8 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const user = useSelector((state: RootState) => state.auth.user);
-
+  const role = useSelector((state:RootState)=>state.auth.user?.role)
+  console.log(role)
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');
@@ -25,13 +26,14 @@ const Navbar = () => {
 
       <div className="navbar__center">
         <ul className="navbar__links">
-          <li><Link to="/all-users">All Users</Link></li>
-          <li><Link to="/add-users">Add Users</Link></li>
-          <li><Link to="/send-test">Send Test</Link></li>
-          <li><Link to="/jobs">Jobs</Link></li> 
-          <li><Link to="/add-questions">Add Questions</Link></li>
-          <li><Link to="/view-questions">View Questions</Link></li>
-          <li><Link to="/results">Results</Link></li>
+          
+          {isAuthenticated && role=="super admin" && <li><Link to="/all-users">All Users</Link></li>}
+          {isAuthenticated && role=="super admin" && <li><Link to="/add-users">Add Users</Link></li>}
+          {isAuthenticated && (role=="super admin" ||role == "talent acquisition") && <li><Link to="/send-test">Send Test</Link></li>}
+          {isAuthenticated && (role=="super admin" ||role == "talent acquisition" ||role == "manager") && <li><Link to="/jobs">Jobs</Link></li>}
+          {isAuthenticated && (role=="manager" ||role == "super admin") && <li><Link to="/add-questions">Add Questions</Link></li>}
+          {isAuthenticated && (role=="super admin" ||role == "talent acquisition" ||role == "manager") && <li><Link to="/view-questions">View Questions</Link></li>}
+          {isAuthenticated && (role=="super admin" ||role == "talent acquisition" ||role == "manager") && <li><Link to="/results">Results</Link></li>}
         </ul>
       </div>
 

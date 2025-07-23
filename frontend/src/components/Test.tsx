@@ -37,6 +37,43 @@ const Test = () => {
   useEffect(() => {
     if (!started || submitted) return;
 
+    // Detect exiting fullscreen (user presses ESC or uses browser controls)
+    const onFullScreenChange = () => {
+      if (!document.fullscreenElement) {
+        alert('You exited fullscreen.');
+        // handleSubmit();
+      }
+    };
+
+    // Other existing listeners
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        alert('Tab switching is not allowed.');
+        // handleSubmit();
+      }
+    };
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = 'Are you sure you want to leave the test?';
+    };
+
+    document.addEventListener('fullscreenchange', onFullScreenChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullScreenChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [started, submitted]);
+
+
+
+  useEffect(() => {
+    if (!started || submitted) return;
+
     const timer = setInterval(() => {
       setTimeLeft((prevTimeLeft) => {
         if (prevTimeLeft <= 1) {
@@ -145,6 +182,8 @@ const Test = () => {
 
       console.log('Evaluation result:', res.data);
       setScore(res.data.correct); // set score from backend response
+
+
 
       // Optional: Show feedback or save to backend
     } catch (error) {
