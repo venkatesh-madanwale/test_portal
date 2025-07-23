@@ -23,5 +23,5 @@ export const getTypeOrmConfig = (
   synchronize: true,
 
   // Enable query logging in dev only (remove or conditionally control in prod)
-  logging: true,
+  logging: false,
 });

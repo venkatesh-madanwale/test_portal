@@ -11,5 +11,6 @@ import { Option } from './entities/option.entity';
   imports: [TypeOrmModule.forFeature([Skill, McqQuestion, Option, User])],
   controllers: [QuestionBankController],
   providers: [QuestionBankService],
+  exports: [QuestionBankService],
 })
 export class QuestionBankModule {}
