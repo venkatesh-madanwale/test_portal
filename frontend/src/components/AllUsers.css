@@ -56,3 +56,10 @@
 .all-users-table tbody tr:hover {
   background-color: #eef6ff;
 }
+
+
+.status-dropdown {
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}

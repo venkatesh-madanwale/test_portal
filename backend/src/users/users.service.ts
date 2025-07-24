@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
 import * as bcrypt from 'bcrypt';
+import { ToggleUserStatusDto } from './dto/toggle-user-status.dto';
 
 @Injectable()
 export class UsersService {
@@ -70,5 +71,36 @@ export class UsersService {
       status: user.status,
       createdAt: user.createdAt,
     }));
+  }
+
+
+  async toggleUserStatus(toggleUserStatusDto: ToggleUserStatusDto) {
+    const { userId, status } = toggleUserStatusDto;
+    // Check if user exists
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+    });
+ 
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+ 
+    // Update only the status field
+    const updateResult = await this.userRepo.update(
+      { id: userId },
+      { status: status },
+    );
+ 
+    if (updateResult.affected === 0) {
+      throw new BadRequestException('Failed to update user status');
+    }
+ 
+    // Return the updated user
+    const updatedUser = await this.userRepo.findOne({
+      where: { id: userId },
+      select: ['id'], // Only select necessary fields
+    });
+ 
+    return updatedUser;
   }
 }
