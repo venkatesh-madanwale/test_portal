@@ -49,7 +49,7 @@ export class ApplicantQuestionController {
     @Param('applicantId') applicantId: string,
     @Param('attemptId') attemptId: string,
   ) {
-    return this.aqService.getLastAnsweredQuestion(applicantId, attemptId);
+    return this.aqService.resumeTest(applicantId, attemptId);
   }
 
   // 5. Evaluate test

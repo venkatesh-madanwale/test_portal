@@ -75,7 +75,7 @@ function App() {
                   <Route
                     path="/add-job"
                     element={
-                      <ProtectedRoute allowedRoles={['super admin', 'manager']}>
+                      <ProtectedRoute allowedRoles={['super admin','talent acquisition']}>
                         <AddJob />
                       </ProtectedRoute>
                     }

@@ -29,7 +29,7 @@ const Test = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState(45 * 60); // 45 minutes
+  const [timeLeft, setTimeLeft] = useState(45 * 60);
   const [started, setStarted] = useState(false);
 
   const handle = useFullScreenHandle();
@@ -37,19 +37,15 @@ const Test = () => {
   useEffect(() => {
     if (!started || submitted) return;
 
-    // Detect exiting fullscreen (user presses ESC or uses browser controls)
     const onFullScreenChange = () => {
       if (!document.fullscreenElement) {
         alert('You exited fullscreen.');
-        // handleSubmit();
       }
     };
 
-    // Other existing listeners
     const handleVisibilityChange = () => {
       if (document.hidden) {
         alert('Tab switching is not allowed.');
-        // handleSubmit();
       }
     };
 
@@ -69,8 +65,6 @@ const Test = () => {
     };
   }, [started, submitted]);
 
-
-
   useEffect(() => {
     if (!started || submitted) return;
 
@@ -86,45 +80,14 @@ const Test = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [started, submitted, questions, answers]);
+  }, [started, submitted]);
 
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      if (!token || !applicantId || !attemptId) {
-        console.error('Missing URL parameters.');
-        return;
-      }
-
-      try {
-        const url = `http://localhost:3000/applicant-questions/assigned/${applicantId}/${attemptId}`;
-        const response = await axios.get<ApiQuestion[]>(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setQuestions(response.data);
-      } catch (error) {
-        console.error('Error fetching MCQs:', error);
-      }
-    };
-
-    fetchQuestions();
-  }, [token, applicantId, attemptId]);
-
-  // const handleOptionChange = (questionId: string, optionId: string) => {
-  //   setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
-  // };
   const handleOptionChange = async (questionId: string, optionId: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
 
     try {
-      console.log(applicantId,
-        attemptId,
-        questionId,
-        optionId,)
       await axios.post(
         'http://localhost:3000/applicant-questions/answer',
-        // 'http://localhost:3000/answer',
         {
           applicantId,
           attemptId,
@@ -137,36 +100,16 @@ const Test = () => {
           },
         }
       );
-
-      console.log('Answer saved for question:', questionId);
     } catch (error) {
       console.error('Failed to save answer:', error);
     }
   };
-
 
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
     }
   };
-
-  // const handleSubmit = () => {
-  //   let calculatedScore = 0;
-  //   questions.forEach((q) => {
-  //     const selectedOptionId = answers[q.mcq_question.id];
-  //     const correctOption = q.mcq_question.options.find((opt) => opt.isCorrect);
-  //     if (selectedOptionId === correctOption?.id) {
-  //       calculatedScore += 1;
-  //     }
-  //   });
-  //   setScore(calculatedScore);
-  //   setSubmitted(true);
-  //   // setTimeout(() => {
-  //   //   window.close();
-  //   // }, 3000); // 3-second delay to allow user to see the result
-  // };
-
 
   const handleSubmit = async () => {
     setSubmitted(true);
@@ -179,38 +122,90 @@ const Test = () => {
           },
         }
       );
-
-      console.log('Evaluation result:', res.data);
-      setScore(res.data.correct); // set score from backend response
-
-
-
-      // Optional: Show feedback or save to backend
+      setScore(res.data.correct);
     } catch (error) {
       console.error('Error evaluating test:', error);
     }
   };
 
-
-
-
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
     const s = (seconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
+    return `${m}:${s}`;s
   };
 
-  const handleStartTest = () => {
-    handle.enter();
-    setStarted(true);
+  const handleStartTest = async () => {
+    try {
+      // Try to resume first
+      const resumeUrl = `http://localhost:3000/applicant-questions/resume/${applicantId}/${attemptId}`;
+      const resumeResponse = await axios.get(resumeUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const allQuestions: ApiQuestion[] = resumeResponse.data.questions;
+      const lastSeen = resumeResponse.data.lastSeenQuestion;
+
+      // Resume from last answered + 1
+      let resumeIndex = 0;
+      if (lastSeen) {
+        const idx = allQuestions.findIndex(
+          (q) => q.mcq_question.id === lastSeen.id
+        );
+        if (idx !== -1) {
+          resumeIndex = Math.min(idx + 1, allQuestions.length - 1);
+        }
+      }
+
+      setQuestions(allQuestions);
+      setCurrentIndex(resumeIndex);
+      handle.enter();
+      setStarted(true);
+    } catch (error: any) {
+      if (
+        axios.isAxiosError(error) &&
+        error.response?.data?.message === 'Max resume attempts exceeded'
+      ) {
+        alert('Resume limit exceeded');
+      } else if (
+        axios.isAxiosError(error) &&
+        error.response?.data?.message === 'Test attempt not found'
+      ) {
+        alert('Invalid link or attempt');
+      } else if (
+        axios.isAxiosError(error) &&
+        (error.response?.data?.message === 'Test has already been submitted' ||
+          error.response?.data?.message === 'You have already attended the test')
+      ) {
+        setSubmitted(true);
+      } else {
+        // First-time fallback: assigned
+        try {
+          const assignedUrl = `http://localhost:3000/applicant-questions/assigned/${applicantId}/${attemptId}`;
+          const assignedResponse = await axios.get<ApiQuestion[]>(assignedUrl, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          setQuestions(assignedResponse.data);
+          setCurrentIndex(0);
+          handle.enter();
+          setStarted(true);
+        } catch (innerErr) {
+          console.error('Unable to fetch questions:', innerErr);
+          alert('Something went wrong while starting the test.');
+        }
+      }
+    }
   };
 
   return (
     <FullScreen handle={handle}>
       <div className="main-container">
-
         <div className="mcq-test-container">
-          {!started ? (
+          {!started && !submitted ? (
             <div className="instructions">
               <h2>Instructions</h2>
               <ul>
@@ -222,6 +217,11 @@ const Test = () => {
               <button className="submit-button" onClick={handleStartTest}>
                 Start Test
               </button>
+            </div>
+          ) : submitted && !started ? (
+            <div className="result">
+              <h3>Test Already Completed</h3>
+              <p>You have already completed this test. You cannot retake it.</p>
             </div>
           ) : questions.length === 0 ? (
             <p>Loading questions...</p>
@@ -260,7 +260,6 @@ const Test = () => {
                   {currentIndex < questions.length - 1 ? (
                     <button
                       className="submit-button"
-                      type="button"
                       onClick={handleNext}
                       disabled={!answers[questions[currentIndex].mcq_question.id]}
                     >
@@ -269,7 +268,6 @@ const Test = () => {
                   ) : (
                     <button
                       className="submit-button"
-                      type="button"
                       onClick={handleSubmit}
                       disabled={!answers[questions[currentIndex].mcq_question.id]}
                     >
@@ -282,7 +280,6 @@ const Test = () => {
           )}
         </div>
       </div>
-
     </FullScreen>
   );
 };

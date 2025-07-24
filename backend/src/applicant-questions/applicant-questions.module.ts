@@ -6,10 +6,11 @@ import { ApplicantQuestionController } from './applicant-questions.controller';
 import { Option } from 'src/question-bank/entities/option.entity';
 import { ApplicantAnswer } from 'src/applicants/entities/applicant-answer.entity';
 import { TestAttempt } from 'src/evaluation/entities/test-attempt.entity';
+import { TestAccessToken } from 'src/evaluation/entities/test-access-token.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ApplicantQuestion, ApplicantAnswer, Option, TestAttempt]),
+    TypeOrmModule.forFeature([ApplicantQuestion, ApplicantAnswer, Option, TestAttempt, TestAccessToken]),
   ],
   controllers: [ApplicantQuestionController],
   providers: [ApplicantQuestionService],
