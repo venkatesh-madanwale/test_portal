@@ -13,6 +13,7 @@ import { SkillsModule } from './skills/skills.module';
 import { QuestionBankModule } from './question-bank/question-bank.module';
 import { EvaluationModule } from './evaluation/evaluation.module';
 import { MailerModule } from './mailer/mailer.module';
+import { MalpracticeModule } from './malpractice/malpractice.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { MailerModule } from './mailer/mailer.module';
     ApplicantQuestionModule,
     EvaluationModule,
     MailerModule,
+    MalpracticeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -4,11 +4,13 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { McqQuestion } from 'src/question-bank/entities/question.entity';
 import { Option } from 'src/question-bank/entities/option.entity';
 import { TestAttempt } from 'src/evaluation/entities/test-attempt.entity';
 import { Applicant } from 'src/evaluation/entities/test_attempt.entity';
+import { Malpractice } from 'src/malpractice/entities/malpractice.entity';
 
 @Entity('applicant_answers')
 export class ApplicantAnswer {
@@ -33,4 +35,9 @@ export class ApplicantAnswer {
 
   @Column({ type: 'timestamp' })
   answered_at: Date;
+
+  @OneToMany(() => Malpractice, (malpractice) => malpractice.applicantId, {
+      cascade: true,
+    })
+    malpractice: Malpractice[];
 }
