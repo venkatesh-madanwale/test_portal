@@ -1,0 +1,72 @@
+/* === LAYOUT WRAPPER === */
+.proctor-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f7fafc;
+}
+
+/* === WEBCAM + VERIFIED IMAGE SECTION === */
+.webcam-section {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 32px;
+  padding: 20px 40px;
+  flex-wrap: wrap;
+}
+
+/* === VERIFIED IMAGE === */
+.verified-image-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.verified-image-container img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #2b6cb0;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.verified-image-container label {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #2d3748;
+}
+
+/* === MALPRACTICE FLOATING BADGE === */
+.malpractice-badge {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  background-color: #e8f5e9;
+  border-left: 4px solid #4caf50;
+  color: #2e7d32;
+}
+
+.malpractice-badge.alert {
+  background-color: #ffebee;
+  border-left-color: #f44336;
+  color: #c62828;
+}
+
+/* === ALERT SECTION === */
+.alert-box {
+  margin: 0 40px 20px;
+  padding: 12px 16px;
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  border-radius: 5px;
+  font-size: 14px;
+}

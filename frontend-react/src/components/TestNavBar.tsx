@@ -1,4 +1,9 @@
-const Navbar = ({ capturedImage, onExit }) => {
+type NavbarProps = {
+  capturedImage?: string;
+  onExit: () => void;
+};
+
+const TestNavBar = ({ capturedImage, onExit }: NavbarProps) => {
   return (
     <nav style={{ 
       display: 'flex', 
@@ -42,4 +47,4 @@ const Navbar = ({ capturedImage, onExit }) => {
   );
 };
 
-export default Navbar;
+export default TestNavBar;

@@ -7,6 +7,9 @@ import { FullScreen, useFullScreenHandle } from 'react-full-screen';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ConfirmModal from './ConfirmModal';
+import TestNavBar from './TestNavBar';
+import WebcamCapture from './WebcamCapture';
+import Alerts from './Alerts';
 
 interface Option {
   id: string;
@@ -29,6 +32,12 @@ export interface ApiQuestion {
   mcq_question: MCQ;
 }
 
+interface MalpracticeEntry {
+  message: any;
+  imageUrl: any;
+  timestamp: string;
+}
+
 const Test = () => {
   const { token, applicantId, attemptId } = useParams();
   const [questions, setQuestions] = useState<ApiQuestion[]>([]);
@@ -36,12 +45,17 @@ const Test = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState(45 * 60);
+  const [timeLeft, setTimeLeft] = useState(450 * 60);
   const [started, setStarted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [submittingFinal, setSubmittingFinal] = useState(false);
   const [unlockedIndex, setUnlockedIndex] = useState(0);
+  const [capturedImage, setCapturedImage] = useState<string | undefined>(undefined);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [malpracticeCount, setMalpracticeCount] = useState(0);
+  const [malpracticeData, setMalpracticeData] = useState<MalpracticeEntry[]>([]);
+  const [isFaceVerified, setIsFaceVerified] = useState(false);
 
   const handle = useFullScreenHandle();
 
@@ -95,6 +109,32 @@ const Test = () => {
     return () => clearInterval(timer);
   }, [started, submitted, attemptId]);
 
+  useEffect(() => {
+    if (malpracticeCount >= 5 && !submitted) {
+      setSubmitted(true);
+      setAlertMessage("❌ Test terminated due to multiple malpractices (5 violations detected)");
+    }
+  }, [malpracticeCount, submitted]);
+
+  const handleMalpracticeDetected = (message: any, imageUrl: any) => {
+    if (isFaceVerified && !alertMessage.startsWith("⚠️")) {
+      setMalpracticeCount((prev) => {
+        const newCount = prev + 1;
+        if (newCount <= 5) {
+          setMalpracticeData((prevData) => [
+            ...prevData,
+            { message, imageUrl, timestamp: new Date().toISOString() },
+          ]);
+        }
+        return newCount;
+      });
+    }
+  };
+
+  const handleFaceVerified = () => {
+    setIsFaceVerified(true);
+  };
+
   const formatTime = (sec: number) => {
     const m = Math.floor(sec / 60).toString().padStart(2, '0');
     const s = (sec % 60).toString().padStart(2, '0');
@@ -112,9 +152,6 @@ const Test = () => {
       prev.map((q, i) => (i === index ? { ...q, status, editable } : q))
     );
   };
-
-
-
 
   const handleNext = async () => {
     const q = questions[currentIndex];
@@ -147,12 +184,9 @@ const Test = () => {
     if (currentIndex < questions.length - 1) {
       const nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
-      setUnlockedIndex((prev) => Math.max(prev, nextIndex)); // unlock next question
+      setUnlockedIndex((prev) => Math.max(prev, nextIndex));
     }
   };
-
-
-
 
   const handleSkip = async () => {
     const q = questions[currentIndex];
@@ -166,7 +200,7 @@ const Test = () => {
       updateQuestionStatus(currentIndex, 'skipped', true);
       const nextIndex = Math.min(currentIndex + 1, questions.length - 1);
       setCurrentIndex(nextIndex);
-      setUnlockedIndex((prev) => Math.max(prev, nextIndex)); // Unlock next
+      setUnlockedIndex((prev) => Math.max(prev, nextIndex));
     } catch {
       toast.error('Error skipping question');
     }
@@ -184,7 +218,7 @@ const Test = () => {
               applicantId,
               attemptId,
               questionId: q.mcq_question.id,
-              selectedOptionId: selected
+              selectedOptionId: selected,
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -224,7 +258,6 @@ const Test = () => {
 
       setQuestions(all);
 
-      //  Pre-fill selected options into answers state
       const initialAnswers: { [key: string]: string } = {};
       all.forEach((q: ApiQuestion) => {
         if (q.selectedOptionId) {
@@ -233,8 +266,6 @@ const Test = () => {
       });
       setAnswers(initialAnswers);
 
-      console.log("✅ Initial answers state:", initialAnswers);
-      setCurrentIndex(index >= 0 ? index : 0);
       handle.enter();
       setStarted(true);
       toast.info(`Attempts left: ${3 - (res.data.attemptCount ?? 0)}`);
@@ -245,18 +276,44 @@ const Test = () => {
     }
   };
 
-
   const answeredCount = questions.filter((q) => q.status === 'answered').length;
-  console.log('🟢 answers:', answers);
-  console.log('🟢 currentIndex:', currentIndex);
-  console.log('🟢 currentQ ID:', questions[currentIndex]?.mcq_question.id);
-  console.log('🟢 selected from answers:', answers[questions[currentIndex]?.mcq_question.id]);
-
 
   return (
     <FullScreen handle={handle}>
+      <TestNavBar onExit={() => setShowConfirmModal(true)} capturedImage={capturedImage} />
       <div className="main-container">
         <ToastContainer />
+
+        <WebcamCapture
+          applicantId={applicantId || ''}
+          setCapturedImage={setCapturedImage}
+          setAlertMessage={setAlertMessage}
+          onMalpracticeDetected={handleMalpracticeDetected}
+          isTestStarted={started}
+          isTestCompleted={submitted}
+          setIsTestCompleted={setSubmitted}
+          isFaceVerified={isFaceVerified}
+          onFaceVerified={handleFaceVerified}
+        />
+
+        {alertMessage && <Alerts message={alertMessage} />}
+
+        {malpracticeCount > 0 && !submitted && (
+          <div style={{
+            position: 'fixed',
+            top: 80,
+            right: 20,
+            backgroundColor: malpracticeCount > 3 ? '#ffebee' : '#e8f5e9',
+            padding: '5px 10px',
+            borderRadius: '5px',
+            borderLeft: `3px solid ${malpracticeCount > 3 ? '#f44336' : '#4CAF50'}`,
+            zIndex: 1000
+          }}>
+            Violations: {malpracticeCount}/5
+          </div>
+        )}
+
+        
         {loading ? (
           <div className="spinner">Loading test...</div>
         ) : (
