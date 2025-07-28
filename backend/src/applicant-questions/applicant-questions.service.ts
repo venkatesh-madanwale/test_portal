@@ -10,6 +10,8 @@ import { ApplicantAnswer } from 'src/applicants/entities/applicant-answer.entity
 import { Option } from 'src/question-bank/entities/option.entity';
 import { TestAttempt } from 'src/evaluation/entities/test-attempt.entity';
 import { TestAccessToken } from 'src/evaluation/entities/test-access-token.entity';
+import { EvaluationService } from 'src/evaluation/evaluation.service';
+import { McqQuestion } from 'src/question-bank/entities/question.entity';
 
 @Injectable()
 export class ApplicantQuestionService {
@@ -28,6 +30,9 @@ export class ApplicantQuestionService {
 
     @InjectRepository(TestAccessToken)
     private readonly tokenRepo: Repository<TestAccessToken>,
+
+    private readonly evaluationService: EvaluationService
+
   ) { }
 
   // 1. Start Test 
@@ -45,24 +50,29 @@ export class ApplicantQuestionService {
       throw new BadRequestException('You have already attended the test');
     }
 
-    //  2. If first start, mark attempt as attending
-    if (attempt.attempt_count <= 1 && !attempt.actual_applicant_answered_at) {
+    // 2. If first time starting the test
+    const isFirstStart = !attempt.actual_applicant_answered_at;
+
+    if (isFirstStart) {
+      attempt.attempt_count = 1;
       attempt.test_status = 'attending';
       attempt.actual_applicant_answered_at = new Date();
       await this.attemptRepo.save(attempt);
     }
 
-    // 3. Mark test token as used
-    const token = await this.tokenRepo.findOne({
-      where: { test_attempt: { id: attemptId } },
-    });
+    // 3. Mark test token as used (first-time only)
+    const token = await this.tokenRepo
+      .createQueryBuilder('token')
+      .leftJoin('token.test_attempt', 'test_attempt')
+      .where('test_attempt.id = :attemptId', { attemptId })
+      .getOne();
 
     if (token && !token.is_used) {
       token.is_used = true;
       await this.tokenRepo.save(token);
     }
 
-    //  4. Return all assigned questions
+    // 4. Return all assigned questions
     return this.aqRepo.find({
       where: {
         applicant: { id: applicantId },
@@ -73,31 +83,117 @@ export class ApplicantQuestionService {
   }
 
 
+
   // 2. Resume Test (resume from last question)
   async resumeTest(applicantId: string, attemptId: string) {
-    const attempt = await this.attemptRepo.findOne({ where: { id: attemptId } });
+    const attempt = await this.attemptRepo.findOne({
+      where: { id: attemptId },
+      relations: [
+        'applicant',
+        'applicant.experience_level',
+        'applicant.primary_skill',
+        'applicant.secondary_skill',
+      ],
+    });
 
     if (!attempt) {
       throw new NotFoundException('Test attempt not found');
     }
 
-    // Already completed → don't allow resume
     if (attempt.test_status === 'completed') {
       throw new BadRequestException('Test has already been submitted');
     }
 
-    // Only increment if not first time
-    if (attempt.attempt_count > 1 && attempt.attempt_count >= 3) {
+    attempt.attempt_count = attempt.attempt_count ?? 1;
+    if (attempt.attempt_count >= 3) {
       throw new BadRequestException('Max resume attempts exceeded');
     }
 
-    // Update status and last access
     attempt.attempt_count += 1;
     attempt.test_status = 'attending';
-    attempt.actual_applicant_answered_at = new Date();
+
+    if (!attempt.actual_applicant_answered_at) {
+      attempt.actual_applicant_answered_at = new Date();
+    }
+
     await this.attemptRepo.save(attempt);
 
-    const questions = await this.aqRepo.find({
+    const applicant = attempt.applicant;
+
+    // Load questions with full relations (important!)
+    let applicantQuestions = await this.aqRepo.find({
+      where: {
+        applicant: { id: applicantId },
+        test_attempt: { id: attemptId },
+      },
+      relations: ['mcq_question', 'mcq_question.options', 'mcq_question.skill'],
+      order: { id: 'ASC' },
+    });
+
+    const skipped = applicantQuestions.filter((q) => q.status === 'skipped');
+    // Replace the first not_visited question during resume (security improvement)
+    if (attempt.attempt_count > 1) {
+      const firstUnvisited = applicantQuestions.find((q) => q.status === 'not_visited');
+
+      if (firstUnvisited) {
+        const { skill, difficulty } = firstUnvisited.mcq_question;
+        await this.aqRepo.remove([firstUnvisited]);
+
+        const newQuestion = await this.evaluationService.getOneNewQuestionWithSameDifficulty(
+          skill.id,
+          difficulty,
+          attemptId
+        );
+
+        if (newQuestion) {
+          const newAQ = this.aqRepo.create({
+            applicant: { id: applicantId },
+            test_attempt: { id: attemptId },
+            mcq_question: newQuestion,
+            status: 'not_visited',
+          });
+          await this.aqRepo.save(newAQ);
+        }
+      }
+    }
+
+    if (skipped.length > 0) {
+      // Store info of skipped questions before removing them
+      const skippedInfo = skipped.map((q) => ({
+        difficulty: q.mcq_question.difficulty as 'easy' | 'medium' | 'hard',
+        skillId: q.mcq_question.skill.id,
+      }));
+
+      await this.aqRepo.remove(skipped);
+
+      const newQuestions: McqQuestion[] = [];
+
+      for (const { skillId, difficulty } of skippedInfo) {
+        const newQ = await this.evaluationService.getOneNewQuestionWithSameDifficulty(
+          skillId,
+          difficulty,
+          attemptId,
+        );
+
+        if (newQ) {
+          newQuestions.push(newQ);
+        }
+      }
+
+      const newAq = newQuestions.map((question) =>
+        this.aqRepo.create({
+          applicant: { id: applicantId },
+          test_attempt: { id: attemptId },
+          mcq_question: question,
+          status: 'not_visited',
+        })
+      );
+
+      await this.aqRepo.save(newAq);
+    }
+
+    // Refresh questions with all relations again
+    applicantQuestions = await this.aqRepo.find({
       where: {
         applicant: { id: applicantId },
         test_attempt: { id: attemptId },
@@ -105,21 +201,29 @@ export class ApplicantQuestionService {
       relations: ['mcq_question', 'mcq_question.options'],
     });
 
-    const last = await this.answerRepo.findOne({
-      where: {
-        applicant: { id: applicantId },
-        test_attempt: { id: attemptId },
-      },
-      order: { answered_at: 'DESC' },
-      relations: ['mcq_question'],
+    // Sort: answered first, then skipped, then not_visited
+    applicantQuestions.sort((a, b) => {
+      const order = { answered: 0, skipped: 1, not_visited: 2 };
+      return order[a.status] - order[b.status];
     });
 
+
+    const resumeFrom = applicantQuestions.find(
+      (q) => q.status === 'not_visited' || q.status === 'skipped'
+    );
+
     return {
-      questions,
-      lastSeenQuestion: last?.mcq_question ?? null,
+      questions: applicantQuestions.map((q) => ({
+        id: q.id,
+        status: q.status,
+        selectedOptionId: q.selected_option?.id ?? null,
+        editable: q.status === 'not_visited' || q.status === 'skipped',
+        mcq_question: q.mcq_question,
+      })),
+      lastSeenQuestion: resumeFrom?.mcq_question ?? null,
+      attemptCount: attempt.attempt_count,
     };
   }
-
 
   // 3. Save or Update Answer
   async saveAnswer(
@@ -128,6 +232,7 @@ export class ApplicantQuestionService {
     questionId: string,
     selectedOptionId: string,
   ) {
+    // Validate option
     const option = await this.optionRepo.findOne({
       where: { id: selectedOptionId },
       relations: ['mcqQuestion'],
@@ -137,7 +242,8 @@ export class ApplicantQuestionService {
       throw new NotFoundException('Invalid option selected');
     }
 
-    const existing = await this.answerRepo.findOne({
+    // Get applicant_question entity
+    const applicantQuestion = await this.aqRepo.findOne({
       where: {
         applicant: { id: applicantId },
         test_attempt: { id: attemptId },
@@ -145,13 +251,16 @@ export class ApplicantQuestionService {
       },
     });
 
-    if (existing) {
-      existing.selected_option = option;
-      existing.answered_at = new Date();
-      await this.answerRepo.save(existing);
-      return { message: 'Answer updated successfully' };
+    if (!applicantQuestion) {
+      throw new NotFoundException('Applicant question not found');
     }
 
+    // Prevent resubmitting already answered
+    if (applicantQuestion.status === 'answered') {
+      throw new BadRequestException('You have already submitted this question');
+    }
+
+    // Save the answer
     const answer = this.answerRepo.create({
       applicant: { id: applicantId },
       test_attempt: { id: attemptId },
@@ -161,8 +270,43 @@ export class ApplicantQuestionService {
     });
 
     await this.answerRepo.save(answer);
-    return { message: 'Answer saved successfully' };
+
+    // Update question status to 'answered'
+    applicantQuestion.status = 'answered';
+    await this.aqRepo.save(applicantQuestion);
+
+    return { message: 'Answer submitted successfully' };
   }
+
+  async skipQuestion(
+    applicantId: string,
+    attemptId: string,
+    questionId: string,
+  ) {
+    const applicantQuestion = await this.aqRepo.findOne({
+      where: {
+        applicant: { id: applicantId },
+        test_attempt: { id: attemptId },
+        mcq_question: { id: questionId },
+      },
+    });
+
+    if (!applicantQuestion) {
+      throw new NotFoundException('Applicant question not found');
+    }
+
+    // Prevent skipping already answered
+    if (applicantQuestion.status === 'answered') {
+      throw new BadRequestException('Cannot skip an already answered question');
+    }
+
+    // Update status to skipped
+    applicantQuestion.status = 'skipped';
+    await this.aqRepo.save(applicantQuestion);
+
+    return { message: 'Question skipped successfully' };
+  }
+
 
   // 4. View Submitted Answers
   async getAnswers(applicantId: string, attemptId: string) {

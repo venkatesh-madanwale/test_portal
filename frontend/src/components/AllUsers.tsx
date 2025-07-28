@@ -33,24 +33,6 @@ const AllUsers: React.FC = () => {
     setFilters({ ...filters, [field]: value });
   };
 
-  const handleStatusChange = (userId: string, newStatus: string) => {
-    axios
-      .put('http://localhost:3000/users/toggle-status', {
-        userId,
-        status: newStatus,
-      })
-      .then(() => {
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user.id === userId ? { ...user, status: newStatus } : user
-          )
-        );
-      })
-      .catch((err) => console.error('Error updating status:', err));
-  };
-
-
-
   const filteredUsers = users.filter((user) => {
     return (
       user.name.toLowerCase().includes(filters.name.toLowerCase()) &&
@@ -125,20 +107,7 @@ const AllUsers: React.FC = () => {
                 <td>{user.email}</td>
                 <td>{user.phone}</td>
                 <td>{user.role}</td>
-                {/* <td>{user.status}</td> */}
-
-
-                <td>
-                  <select
-                    value={user.status}
-                    onChange={(e) => handleStatusChange(user.id, e.target.value)}
-                    className="status-dropdown"
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                </td>
-
+                <td>{user.status}</td>
                 {/* <td>{new Date(user.createdAt).toLocaleString().slice(0, 9)}</td> */}
 
                 <td>

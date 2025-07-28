@@ -10,7 +10,7 @@ const Navbar = () => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const user = useSelector((state: RootState) => state.auth.user);
   const role = useSelector((state:RootState)=>state.auth.user?.role)
-  // console.log(role)
+  console.log(role)
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');

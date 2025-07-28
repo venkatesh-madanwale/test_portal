@@ -26,4 +26,12 @@ export class ApplicantQuestion {
   @ManyToOne(() => TestAttempt, { eager: false })
   @JoinColumn({ name: 'test_attempt_id' })
   test_attempt: TestAttempt;
+
+
+    @ManyToOne(() => Option, { eager: true, nullable: true })
+  @JoinColumn({ name: 'selected_option_id' })
+  selected_option: Option;
+
+  @Column({ default: 'not_visited' })
+  status: 'not_visited' | 'skipped' | 'answered';
 }
