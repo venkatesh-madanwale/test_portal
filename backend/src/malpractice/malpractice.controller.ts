@@ -10,8 +10,9 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MalpracticeService } from './malpractice.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { RegisterCandidateDto } from './dto/create-malpractice.dto';
+// import { RegisterCandidateDto } from './dto/create-malpractice.dto';
 import { AddAlertDto } from './dto/create-alert.dto';
+import { CreateMalpracticeDto } from './dto/create-malpractice.dto';
 
 @Controller('malpractice')
 export class MalpracticeController {
@@ -26,7 +27,7 @@ export class MalpracticeController {
   @Header('Access-Control-Allow-Credentials', 'true')
   async registerCandidate(
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: RegisterCandidateDto,
+    @Body() body: CreateMalpracticeDto,
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
 

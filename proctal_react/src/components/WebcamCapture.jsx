@@ -16,16 +16,13 @@ const WebcamCapture = ({
   const [faceDetected, setFaceDetected] = useState(false);
   const [verificationComplete, setVerificationComplete] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
-  const [applicantId, setApplicantId] = useState("0a15dded-af9b-49af-807a-98e9ced9fa76");
+  // const [applicantId, setApplicantId] = useState("0a15dded-af9b-49af-807a-98e9ced9fa76");
+  const applicantId = "7e9de9a3-8e0d-4450-8538-8c30f6d00044"
   const [isLoading, setIsLoading] = useState(false);
   const [isDetectionPaused, setIsDetectionPaused] = useState(false);
   const [lastViolationTime, setLastViolationTime] = useState(0);
   const [lastAlertMessage, setLastAlertMessage] = useState("");
 
-  // Initialize applicant ID
-  // useEffect(() => {
-  //   setApplicantId(`user_${Math.floor(Math.random() * 1000)}`);
-  // }, []);
 
   const getWarningMessage = useCallback((alertMessage) => {
     switch (alertMessage) {
@@ -59,7 +56,7 @@ const WebcamCapture = ({
           const formData = new FormData();
           formData.append("file", file);
           formData.append("alertMessage", message);
-          formData.append("userId", applicantId);
+          formData.append("applicantId", applicantId);
 
           const res = await axios.post(
             "http://localhost:3000/malpractice/alert",

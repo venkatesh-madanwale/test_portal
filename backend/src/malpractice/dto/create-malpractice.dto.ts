@@ -21,11 +21,4 @@ export class CreateMalpracticeDto {
   @IsString()
   @IsOptional()
   malpracticeImageUrl?: string;
-
-
-  
-
 }
-export class RegisterCandidateDto {
-  @IsString()
-  applicantId: string;}
