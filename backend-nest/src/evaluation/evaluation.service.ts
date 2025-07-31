@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { Applicant } from './entities/test_attempt.entity';
+import { Applicant } from './entities/applicants.entity';
 import { Skill } from 'src/skills/entities/skill.entity';
 import { McqQuestion } from 'src/question-bank/entities/question.entity';
 import { TestAttempt } from './entities/test-attempt.entity';
@@ -99,278 +99,133 @@ export class EvaluationService {
       excludeQuestionIds = existing.map((item) => item.mcq_question.id);
     }
 
-    // const getDifficultyCounts = (
-    //   total: number,
-    //   split: Record<'easy' | 'medium' | 'hard', number>,
-    //   allowHard: boolean,
-    // ) => {
-    //   const adjustedSplit = allowHard
-    //     ? split
-    //     : {
-    //       easy:
-    //         split.easy +
-    //         (split.hard / 100) * (split.easy / (split.easy + split.medium)),
-    //       medium:
-    //         split.medium +
-    //         (split.hard / 100) * (split.medium / (split.easy + split.medium)),
-    //       hard: 0,
-    //     };
+    const getDifficultyCounts = (
+      total: number,
+      split: Record<'easy' | 'medium' | 'hard', number>,
+      allowHard: boolean,
+    ) => {
+      const adjustedSplit = allowHard
+        ? split
+        : {
+          easy:
+            split.easy +
+            (split.hard / 100) * (split.easy / (split.easy + split.medium)),
+          medium:
+            split.medium +
+            (split.hard / 100) * (split.medium / (split.easy + split.medium)),
+          hard: 0,
+        };
 
-    //   const easy = Math.floor((adjustedSplit.easy / 100) * total);
-    //   const medium = Math.floor((adjustedSplit.medium / 100) * total);
-    //   const hard = allowHard ? total - (easy + medium) : 0;
+      const easy = Math.floor((adjustedSplit.easy / 100) * total);
+      const medium = Math.floor((adjustedSplit.medium / 100) * total);
+      const hard = allowHard ? total - (easy + medium) : 0;
 
-    //   const sum = easy + medium + hard;
-    //   const diff = total - sum;
+      const sum = easy + medium + hard;
+      const diff = total - sum;
 
-    //   return {
-    //     easy: easy + diff,
-    //     medium,
-    //     hard,
-    //   };
-    // };
+      return {
+        easy: easy + diff,
+        medium,
+        hard,
+      };
+    };
 
-    // const fetchQuestionsBySkill = async (
-    //   skillId: string,
-    //   totalCount: number,
-    //   allowHard: boolean,
-    // ): Promise<McqQuestion[]> => {
-    //   const counts = getDifficultyCounts(totalCount, difficultySplit, allowHard);
-    //   const result: McqQuestion[] = [];
+    const fetchQuestionsBySkill = async (
+      skillId: string,
+      totalCount: number,
+      allowHard: boolean,
+    ): Promise<McqQuestion[]> => {
+      const counts = getDifficultyCounts(totalCount, difficultySplit, allowHard);
+      const result: McqQuestion[] = [];
 
-    //   for (const [difficulty, count] of Object.entries(counts)) {
-    //     if (count <= 0) continue;
+      for (const [difficulty, count] of Object.entries(counts)) {
+        if (count <= 0) continue;
 
-    //     const query = this.questionRepo
-    //       .createQueryBuilder('q')
-    //       .where('q.skill.id = :skillId', { skillId })
-    //       .andWhere('q.difficulty = :difficulty', { difficulty });
+        const query = this.questionRepo
+          .createQueryBuilder('q')
+          .where('q.skill.id = :skillId', { skillId })
+          .andWhere('q.difficulty = :difficulty', { difficulty });
 
-    //     if (excludeQuestionIds.length > 0) {
-    //       query.andWhere('q.id NOT IN (:...excludeIds)', {
-    //         excludeIds: excludeQuestionIds,
-    //       });
-    //     }
+        if (excludeQuestionIds.length > 0) {
+          query.andWhere('q.id NOT IN (:...excludeIds)', {
+            excludeIds: excludeQuestionIds,
+          });
+        }
 
-    //     const questions = await query
-    //       .orderBy('RANDOM()')
-    //       .limit(count)
-    //       .getMany();
+        const questions = await query
+          .orderBy('RANDOM()')
+          .limit(count)
+          .getMany();
 
-    //     result.push(...questions);
-    //   }
+        result.push(...questions);
+      }
 
-    //   return result;
-    // };
+      return result;
+    };
 
-    // const fetchAptitudeQuestions = async (): Promise<McqQuestion[]> => {
-    //   const aptitudeSkill = await this.skillRepo.findOne({
-    //     where: { name: 'aptitude' },
-    //   });
+    const fetchAptitudeQuestions = async (): Promise<McqQuestion[]> => {
+      const aptitudeSkill = await this.skillRepo.findOne({
+        where: { name: 'aptitude' },
+      });
 
-    //   if (!aptitudeSkill) {
-    //     throw new BadRequestException('Aptitude skill not found');
-    //   }
+      if (!aptitudeSkill) {
+        throw new BadRequestException('Aptitude skill not found');
+      }
 
-    //   const total = 10;
-    //   const counts = getDifficultyCounts(total, difficultySplit, true);
-    //   const result: McqQuestion[] = [];
-    //   const alreadyFetched = new Set<string>();
+      const total = 10;
+      const counts = getDifficultyCounts(total, difficultySplit, true);
+      const result: McqQuestion[] = [];
+      const alreadyFetched = new Set<string>();
 
-    //   const fetchByDifficulty = async (
-    //     difficulty: string,
-    //     count: number,
-    //   ): Promise<McqQuestion[]> => {
-    //     if (count <= 0) return [];
+      const fetchByDifficulty = async (
+        difficulty: string,
+        count: number,
+      ): Promise<McqQuestion[]> => {
+        if (count <= 0) return [];
 
-    //     const query = this.questionRepo
-    //       .createQueryBuilder('q')
-    //       .where('q.skill.id = :skillId', { skillId: aptitudeSkill.id })
-    //       .andWhere('q.difficulty = :difficulty', { difficulty });
+        const query = this.questionRepo
+          .createQueryBuilder('q')
+          .where('q.skill.id = :skillId', { skillId: aptitudeSkill.id })
+          .andWhere('q.difficulty = :difficulty', { difficulty });
 
-    //     const excluded = [...alreadyFetched, ...excludeQuestionIds];
-    //     if (excluded.length > 0) {
-    //       query.andWhere('q.id NOT IN (:...ids)', {
-    //         ids: excluded,
-    //       });
-    //     }
+        const excluded = [...alreadyFetched, ...excludeQuestionIds];
+        if (excluded.length > 0) {
+          query.andWhere('q.id NOT IN (:...ids)', {
+            ids: excluded,
+          });
+        }
 
-    //     const questions = await query.orderBy('RANDOM()').limit(count).getMany();
+        const questions = await query.orderBy('RANDOM()').limit(count).getMany();
 
-    //     questions.forEach((q) => alreadyFetched.add(q.id));
-    //     return questions;
-    //   };
-
-    //   for (const [difficulty, count] of Object.entries(counts)) {
-    //     const fetched = await fetchByDifficulty(difficulty, count);
-    //     result.push(...fetched);
-    //   }
-
-    //   const remaining = total - result.length;
-    //   if (remaining > 0) {
-    //     const query = this.questionRepo
-    //       .createQueryBuilder('q')
-    //       .where('q.skill.id = :skillId', { skillId: aptitudeSkill.id });
-
-    //     const excluded = [...alreadyFetched, ...excludeQuestionIds];
-    //     if (excluded.length > 0) {
-    //       query.andWhere('q.id NOT IN (:...ids)', {
-    //         ids: excluded,
-    //       });
-    //     }
-
-    //     const fallback = await query.orderBy('RANDOM()').limit(remaining).getMany();
-    //     fallback.forEach((q) => alreadyFetched.add(q.id));
-    //     result.push(...fallback);
-    //   }
-
-    //   return result;
-    // };
-
-
-// ✏️ FIXED: Add default empty object to avoid TypeError when accessing .easy, .medium, .hard
-const getDifficultyCounts = (
-  total: number,
-  split: Record<'easy' | 'medium' | 'hard', number> = { easy: 0, medium: 0, hard: 0 },
-  allowHard: boolean,
-) => {
-  // ✅ Handle undefined or missing 'split' gracefully
-  const adjustedSplit = allowHard
-    ? split
-    : {
-        easy:
-          split.easy +
-          (split.hard / 100) * (split.easy / (split.easy + split.medium || 1)),
-        medium:
-          split.medium +
-          (split.hard / 100) * (split.medium / (split.easy + split.medium || 1)),
-        hard: 0,
+        questions.forEach((q) => alreadyFetched.add(q.id));
+        return questions;
       };
 
-  const easy = Math.floor((adjustedSplit.easy / 100) * total);
-  const medium = Math.floor((adjustedSplit.medium / 100) * total);
-  const hard = allowHard ? total - (easy + medium) : 0;
+      for (const [difficulty, count] of Object.entries(counts)) {
+        const fetched = await fetchByDifficulty(difficulty, count);
+        result.push(...fetched);
+      }
 
-  const sum = easy + medium + hard;
-  const diff = total - sum;
+      const remaining = total - result.length;
+      if (remaining > 0) {
+        const query = this.questionRepo
+          .createQueryBuilder('q')
+          .where('q.skill.id = :skillId', { skillId: aptitudeSkill.id });
 
-  return {
-    easy: easy + diff,
-    medium,
-    hard,
-  };
-};
+        const excluded = [...alreadyFetched, ...excludeQuestionIds];
+        if (excluded.length > 0) {
+          query.andWhere('q.id NOT IN (:...ids)', {
+            ids: excluded,
+          });
+        }
 
+        const fallback = await query.orderBy('RANDOM()').limit(remaining).getMany();
+        fallback.forEach((q) => alreadyFetched.add(q.id));
+        result.push(...fallback);
+      }
 
-const fetchQuestionsBySkill = async (
-  skillId: string,
-  totalCount: number,
-  allowHard: boolean,
-): Promise<McqQuestion[]> => {
-  // ✏️ FIXED: Ensure difficultySplit is defined before using
-  const counts = getDifficultyCounts(totalCount, difficultySplit ?? {}, allowHard);
-  const result: McqQuestion[] = [];
-
-  for (const [difficulty, count] of Object.entries(counts)) {
-    if (count <= 0) continue;
-
-    const query = this.questionRepo
-      .createQueryBuilder('q')
-      .where('q.skill.id = :skillId', { skillId })
-      .andWhere('q.difficulty = :difficulty', { difficulty });
-
-    if (excludeQuestionIds.length > 0) {
-      query.andWhere('q.id NOT IN (:...excludeIds)', {
-        excludeIds: excludeQuestionIds,
-      });
-    }
-
-    const questions = await query
-      .orderBy('RANDOM()')
-      .limit(count)
-      .getMany();
-
-    result.push(...questions);
-  }
-
-  return result;
-};
-
-
-
-const fetchAptitudeQuestions = async (): Promise<McqQuestion[]> => {
-  const aptitudeSkill = await this.skillRepo.findOne({
-    where: { name: 'aptitude' },
-  });
-
-  if (!aptitudeSkill) {
-    throw new BadRequestException('Aptitude skill not found');
-  }
-
-  const total = 10;
-  // ✏️ FIXED: Defensive programming against undefined split
-  const counts = getDifficultyCounts(total, difficultySplit ?? {}, true);
-  const result: McqQuestion[] = [];
-  const alreadyFetched = new Set<string>();
-
-  const fetchByDifficulty = async (
-    difficulty: string,
-    count: number,
-  ): Promise<McqQuestion[]> => {
-    if (count <= 0) return [];
-
-    const query = this.questionRepo
-      .createQueryBuilder('q')
-      .where('q.skill.id = :skillId', { skillId: aptitudeSkill.id })
-      .andWhere('q.difficulty = :difficulty', { difficulty });
-
-    const excluded = [...alreadyFetched, ...excludeQuestionIds];
-    if (excluded.length > 0) {
-      query.andWhere('q.id NOT IN (:...ids)', {
-        ids: excluded,
-      });
-    }
-
-    const questions = await query.orderBy('RANDOM()').limit(count).getMany();
-
-    questions.forEach((q) => alreadyFetched.add(q.id));
-    return questions;
-  };
-
-  for (const [difficulty, count] of Object.entries(counts)) {
-    const fetched = await fetchByDifficulty(difficulty, count);
-    result.push(...fetched);
-  }
-
-  const remaining = total - result.length;
-  if (remaining > 0) {
-    const query = this.questionRepo
-      .createQueryBuilder('q')
-      .where('q.skill.id = :skillId', { skillId: aptitudeSkill.id });
-
-    const excluded = [...alreadyFetched, ...excludeQuestionIds];
-    if (excluded.length > 0) {
-      query.andWhere('q.id NOT IN (:...ids)', {
-        ids: excluded,
-      });
-    }
-
-    const fallback = await query.orderBy('RANDOM()').limit(remaining).getMany();
-    fallback.forEach((q) => alreadyFetched.add(q.id));
-    result.push(...fallback);
-  }
-
-  return result;
-};
-
-
-
-
-
-
-
-
-
+      return result;
+    };
 
     const result: McqQuestion[] = [];
 
@@ -406,7 +261,7 @@ const fetchAptitudeQuestions = async (): Promise<McqQuestion[]> => {
         where: { applicant: { email: dto.email } },
       });
 
-      if (existingAttempts >= 3) {
+      if (existingAttempts >= 100) {
         throw new BadRequestException('Maximum test attempts exceeded (3)');
       }
 
@@ -506,31 +361,56 @@ const fetchAptitudeQuestions = async (): Promise<McqQuestion[]> => {
     }
   }
 
+  // async getOneNewQuestionWithSameDifficulty(
+  //   skillId: string,
+  //   difficulty: 'easy' | 'medium' | 'hard',
+  //   attemptId: string,
+  // ): Promise<McqQuestion | null> {
+  //   // Get excluded question IDs for this attempt
+  //   const existingQuestions = await this.applicantQuestionRepo.find({
+  //     where: { test_attempt: { id: attemptId } },
+  //     relations: ['mcq_question'],
+  //   });
+
+  //   const excludeIds = existingQuestions.map((aq) => aq.mcq_question.id);
+
+  //   const query = this.questionRepo
+  //     .createQueryBuilder('q')
+  //     .where('q.skill.id = :skillId', { skillId })
+  //     .andWhere('q.difficulty = :difficulty', { difficulty });
+
+  //   if (excludeIds.length > 0) {
+  //     query.andWhere('q.id NOT IN (:...excludeIds)', { excludeIds });
+  //   }
+
+  //   const question = await query.orderBy('RANDOM()').getOne();
+  //   return question ?? null;
+  // }
+
+
   async getOneNewQuestionWithSameDifficulty(
-    skillId: string,
-    difficulty: 'easy' | 'medium' | 'hard',
-    attemptId: string,
-  ): Promise<McqQuestion | null> {
-    // Get excluded question IDs for this attempt
-    const existingQuestions = await this.applicantQuestionRepo.find({
-      where: { test_attempt: { id: attemptId } },
-      relations: ['mcq_question'],
-    });
-
-    const excludeIds = existingQuestions.map((aq) => aq.mcq_question.id);
-
-    const query = this.questionRepo
-      .createQueryBuilder('q')
-      .where('q.skill.id = :skillId', { skillId })
-      .andWhere('q.difficulty = :difficulty', { difficulty });
-
-    if (excludeIds.length > 0) {
-      query.andWhere('q.id NOT IN (:...excludeIds)', { excludeIds });
-    }
-
-    const question = await query.orderBy('RANDOM()').getOne();
-    return question ?? null;
+  skillId: string,
+  difficulty: 'easy' | 'medium' | 'hard',
+  attemptId: string,
+  excludeIds: string[],
+): Promise<McqQuestion | null> {
+  const query = this.questionRepo
+    .createQueryBuilder('q')
+    .leftJoin('q.skill', 'skill')
+    .where('skill.id = :skillId', { skillId })
+    .andWhere('q.difficulty = :difficulty', { difficulty });
+ 
+  if (excludeIds.length > 0) {
+    query.andWhere('q.id NOT IN (:...excludeIds)', { excludeIds });
   }
-
+ 
+  const question = await query
+    .leftJoinAndSelect('q.options', 'option')
+    .leftJoinAndSelect('q.skill', 'skillRelation')
+    .orderBy('RANDOM()')
+    .getOne();
+ 
+  return question ?? null;
+}
 
 }

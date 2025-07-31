@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './AddMCQ.css';
+import './css/AddMCQ.css';
 import axios from 'axios';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';

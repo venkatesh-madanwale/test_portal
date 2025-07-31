@@ -4,7 +4,7 @@ import { MalpracticeService } from './malpractice.service';
 import { MalpracticeController } from './malpractice.controller';
 import { Malpractice } from './entities/malpractice.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { Applicant } from 'src/evaluation/entities/test_attempt.entity';
+import { Applicant } from 'src/evaluation/entities/applicants.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Malpractice, Applicant])],

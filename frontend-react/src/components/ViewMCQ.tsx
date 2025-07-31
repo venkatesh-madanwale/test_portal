@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './ViewMCQ.css';
+import './css/ViewMCQ.css';
 
 interface Option {
   id: string;

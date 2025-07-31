@@ -1,27 +1,40 @@
-/* === RESET === */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  background-color: f8f9fc;
 }
+
 body {
   font-family: 'Inter', 'Segoe UI', sans-serif;
   background-color: #f8f9fc;
-  color: #2d3748;
+  /* color: #2d3748; */
 }
+
+.web-inst{
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-around;
+  align-items: center;
+  height: 90vh;
+  width: 100%;
+}
+
 
 /* === LAYOUT === */
 .main-container {
   display: flex;
   flex-direction: column;
-  /* height: 100vh; */
-  height: auto;
+  height: 100vh;
   width: 100%;
+  background-color: #f1f5f9;
 }
 
 .mcq-test-container {
   display: flex;
   flex-grow: 1;
+  width: auto;
+  max-height: 80vh;
 }
 
 /* === QUESTION CARD === */
@@ -58,6 +71,7 @@ body {
   flex-direction: column;
   gap: 14px;
 }
+
 .option-item {
   display: flex;
   align-items: center;
@@ -69,14 +83,17 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
 }
+
 .option-item:hover {
   background-color: #e2e8f0;
 }
+
 .option-item input[type='radio'] {
   margin-right: 12px;
   transform: scale(1.1);
 }
-.option-item input[disabled] + span {
+
+.option-item input[disabled]+span {
   color: #999;
 }
 
@@ -95,10 +112,12 @@ body {
   margin-right: 12px;
   transition: background-color 0.2s ease;
 }
+
 .submit-button:hover,
 .skip-button:hover {
   background-color: #1a365d;
 }
+
 .skip-button:disabled {
   background-color: #a0aec0;
   cursor: not-allowed;
@@ -123,6 +142,7 @@ body {
   text-align: center;
   margin-bottom: 24px;
 }
+
 .timer {
   background-color: #2b6cb0;
   color: #fff;
@@ -133,6 +153,7 @@ body {
   display: inline-block;
   margin-bottom: 10px;
 }
+
 .progress {
   font-size: 14px;
   color: #4a5568;
@@ -161,21 +182,26 @@ body {
   transition: 0.2s ease;
   cursor: pointer;
 }
+
 .question-number:hover {
   transform: scale(1.08);
 }
+
 .question-number.answered {
   background-color: #38a169;
   color: white;
 }
+
 .question-number.skipped {
   background-color: #f6ad55;
   color: white;
 }
+
 .question-number.active {
   border: 2px solid #2b6cb0;
   box-shadow: 0 0 4px rgba(43, 108, 176, 0.4);
 }
+
 .question-number.disabled,
 .question-number.no-pointer {
   opacity: 0.5;
@@ -192,21 +218,24 @@ body {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   max-width: 600px;
   text-align: center;
-}
-.instructions h2 {
+} 
+ .instructions h2 {
   font-size: 22px;
   color: #2d3748;
   margin-bottom: 16px;
 }
+
 .instructions ul {
   list-style: disc;
   padding-left: 20px;
   color: #4a5568;
   line-height: 1.6;
 }
+
 .instructions li {
   margin-bottom: 10px;
 }
+
 .result h3 {
   font-size: 20px;
   margin-bottom: 10px;

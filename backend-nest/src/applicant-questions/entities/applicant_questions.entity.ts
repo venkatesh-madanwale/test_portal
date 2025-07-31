@@ -5,7 +5,7 @@ import {
   JoinColumn,
   Column,
 } from 'typeorm';
-import { Applicant } from 'src/evaluation/entities/test_attempt.entity';
+import { Applicant } from 'src/evaluation/entities/applicants.entity';
 import { McqQuestion } from 'src/question-bank/entities/question.entity';
 import { TestAttempt } from 'src/evaluation/entities/test-attempt.entity';
 import { Option } from 'src/question-bank/entities/option.entity';

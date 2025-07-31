@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './AddQuestions.css';
+import './css/AddQuestions.css';
 
 const AddQuestions: React.FC = () => {
   const navigate = useNavigate();

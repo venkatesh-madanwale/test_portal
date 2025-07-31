@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { Applicant } from './test_attempt.entity';
+import { Applicant } from './applicants.entity';
 import { Job } from 'src/jobs/entities/job.entity';
 import { User } from 'src/users/entities/user.entity';
 import { McqQuestion } from 'src/question-bank/entities/question.entity';
@@ -69,11 +69,7 @@ export class TestAttempt {
 
   @Column({ type: 'int', default: 0 })
   attempt_count: number;
-
-  @ManyToOne(() => McqQuestion, { nullable: true })
-  @JoinColumn({ name: 'last_question_id' })
-  last_question: McqQuestion;
-
+  
   @Column({ type: 'boolean', default: false })
   is_submitted: boolean;
 

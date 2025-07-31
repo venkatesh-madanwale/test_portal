@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './AllUsers.css';
+import './css/AllUsers.css';
 
 interface User {
   id: string;

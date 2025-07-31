@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './AddJob.css';
+import './css/AddJob.css';
 import axios from 'axios';
 import { toast } from 'sonner'; // optional for better feedback
 import { useNavigate } from 'react-router-dom';

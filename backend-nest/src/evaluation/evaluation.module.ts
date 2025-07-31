@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EvaluationService } from './evaluation.service';
 import { EvaluationController } from './evaluation.controller';
-import { Applicant } from './entities/test_attempt.entity';
+import { Applicant } from './entities/applicants.entity';
 import { Skill } from 'src/skills/entities/skill.entity';
 import { McqQuestion } from 'src/question-bank/entities/question.entity';
 import { TestAttempt } from './entities/test-attempt.entity';

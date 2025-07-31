@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../redux/slices/authSlice';
 import type { RootState } from '../redux/store';
-import './Login.css';
+import './css/Login.css';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 

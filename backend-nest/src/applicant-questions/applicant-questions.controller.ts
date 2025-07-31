@@ -3,7 +3,7 @@ import { ApplicantQuestionService } from './applicant-questions.service';
 
 @Controller('applicant-questions')
 export class ApplicantQuestionController {
-  constructor(private readonly aqService: ApplicantQuestionService) {}
+  constructor(private readonly aqService: ApplicantQuestionService) { }
 
   // 1. Get all assigned questions
   @Get('assigned/:applicantId/:attemptId')
@@ -60,4 +60,19 @@ export class ApplicantQuestionController {
   ) {
     return this.aqService.evaluateTest(applicantId, attemptId);
   }
+
+  // 6. Skip a question
+  @Patch('skip')
+  async skipQuestion(
+    @Body()
+    body: {
+      applicantId: string;
+      attemptId: string;
+      questionId: string;
+    },
+  ) {
+    const { applicantId, attemptId, questionId } = body;
+    return this.aqService.skipQuestion(applicantId, attemptId, questionId);
+  }
+
 }

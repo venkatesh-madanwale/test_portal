@@ -85,145 +85,292 @@ export class ApplicantQuestionService {
 
 
   // 2. Resume Test (resume from last question)
-  async resumeTest(applicantId: string, attemptId: string) {
-    const attempt = await this.attemptRepo.findOne({
-      where: { id: attemptId },
-      relations: [
-        'applicant',
-        'applicant.experience_level',
-        'applicant.primary_skill',
-        'applicant.secondary_skill',
-      ],
-    });
+  // async resumeTest(applicantId: string, attemptId: string) {
+  //   const attempt = await this.attemptRepo.findOne({
+  //     where: { id: attemptId },
+  //     relations: [
+  //       'applicant',
+  //       'applicant.experience_level',
+  //       'applicant.primary_skill',
+  //       'applicant.secondary_skill',
+  //     ],
+  //   });
 
-    if (!attempt) {
-      throw new NotFoundException('Test attempt not found');
-    }
+  //   if (!attempt) {
+  //     throw new NotFoundException('Test attempt not found');
+  //   }
 
-    if (attempt.test_status === 'completed') {
-      throw new BadRequestException('Test has already been submitted');
-    }
+  //   if (attempt.test_status === 'completed') {
+  //     throw new BadRequestException('Test has already been submitted');
+  //   }
 
-    attempt.attempt_count = attempt.attempt_count ?? 1;
-    if (attempt.attempt_count >= 3) {
-      throw new BadRequestException('Max resume attempts exceeded');
-    }
+  //   attempt.attempt_count = attempt.attempt_count ?? 1;
+  //   if (attempt.attempt_count >= 100) {
+  //     throw new BadRequestException('Max resume attempts exceeded');
+  //   }
 
-    attempt.attempt_count += 1;
-    attempt.test_status = 'attending';
+  //   attempt.attempt_count += 1;
+  //   attempt.test_status = 'attending';
 
-    if (!attempt.actual_applicant_answered_at) {
-      attempt.actual_applicant_answered_at = new Date();
-    }
+  //   if (!attempt.actual_applicant_answered_at) {
+  //     attempt.actual_applicant_answered_at = new Date();
+  //   }
 
-    await this.attemptRepo.save(attempt);
+  //   await this.attemptRepo.save(attempt);
 
-    const applicant = attempt.applicant;
+  //   const applicant = attempt.applicant;
 
-    // Load questions with full relations (important!)
-    let applicantQuestions = await this.aqRepo.find({
-      where: {
-        applicant: { id: applicantId },
-        test_attempt: { id: attemptId },
-      },
-      relations: ['mcq_question', 'mcq_question.options', 'mcq_question.skill'],
-      order: { id: 'ASC' },
-    });
+  //   // Load questions with full relations (important!)
+  //   let applicantQuestions = await this.aqRepo.find({
+  //     where: {
+  //       applicant: { id: applicantId },
+  //       test_attempt: { id: attemptId },
+  //     },
+  //     relations: ['mcq_question', 'mcq_question.options', 'mcq_question.skill'],
+  //     order: { id: 'ASC' },
+  //   });
 
-    const skipped = applicantQuestions.filter((q) => q.status === 'skipped');
-    // Replace the first not_visited question during resume (security improvement)
-    if (attempt.attempt_count > 1) {
-      const firstUnvisited = applicantQuestions.find((q) => q.status === 'not_visited');
+  //   const skipped = applicantQuestions.filter((q) => q.status === 'skipped');
+  //   // Replace the first not_visited question during resume (security improvement)
+  //   if (attempt.attempt_count > 1) {
+  //     const firstUnvisited = applicantQuestions.find((q) => q.status === 'not_visited');
 
-      if (firstUnvisited) {
-        const { skill, difficulty } = firstUnvisited.mcq_question;
-        await this.aqRepo.remove([firstUnvisited]);
+  //     if (firstUnvisited) {
+  //       const { skill, difficulty } = firstUnvisited.mcq_question;
+  //       await this.aqRepo.remove([firstUnvisited]);
 
-        const newQuestion = await this.evaluationService.getOneNewQuestionWithSameDifficulty(
-          skill.id,
-          difficulty,
-          attemptId
-        );
+  //       const newQuestion = await this.evaluationService.getOneNewQuestionWithSameDifficulty(
+  //         skill.id,
+  //         difficulty,
+  //         attemptId
+  //       );
 
-        if (newQuestion) {
-          const newAQ = this.aqRepo.create({
-            applicant: { id: applicantId },
-            test_attempt: { id: attemptId },
-            mcq_question: newQuestion,
-            status: 'not_visited',
-          });
-          await this.aqRepo.save(newAQ);
-        }
-      }
-    }
+  //       if (newQuestion) {
+  //         const newAQ = this.aqRepo.create({
+  //           applicant: { id: applicantId },
+  //           test_attempt: { id: attemptId },
+  //           mcq_question: newQuestion,
+  //           status: 'not_visited',
+  //         });
+  //         await this.aqRepo.save(newAQ);
+  //       }
+  //     }
+  //   }
 
-    if (skipped.length > 0) {
-      // Store info of skipped questions before removing them
-      const skippedInfo = skipped.map((q) => ({
-        difficulty: q.mcq_question.difficulty as 'easy' | 'medium' | 'hard',
-        skillId: q.mcq_question.skill.id,
-      }));
+  //   if (skipped.length > 0) {
+  //     // Store info of skipped questions before removing them
+  //     const skippedInfo = skipped.map((q) => ({
+  //       difficulty: q.mcq_question.difficulty as 'easy' | 'medium' | 'hard',
+  //       skillId: q.mcq_question.skill.id,
+  //     }));
 
-      await this.aqRepo.remove(skipped);
+  //     await this.aqRepo.remove(skipped);
 
-      const newQuestions: McqQuestion[] = [];
+  //     const newQuestions: McqQuestion[] = [];
 
-      for (const { skillId, difficulty } of skippedInfo) {
-        const newQ = await this.evaluationService.getOneNewQuestionWithSameDifficulty(
-          skillId,
-          difficulty,
-          attemptId,
-        );
+  //     for (const { skillId, difficulty } of skippedInfo) {
+  //       const newQ = await this.evaluationService.getOneNewQuestionWithSameDifficulty(
+  //         skillId,
+  //         difficulty,
+  //         attemptId,
+  //       );
 
-        if (newQ) {
-          newQuestions.push(newQ);
-        }
-      }
+  //       if (newQ) {
+  //         newQuestions.push(newQ);
+  //       }
+  //     }
 
-      const newAq = newQuestions.map((question) =>
-        this.aqRepo.create({
+  //     const newAq = newQuestions.map((question) =>
+  //       this.aqRepo.create({
+  //         applicant: { id: applicantId },
+  //         test_attempt: { id: attemptId },
+  //         mcq_question: question,
+  //         status: 'not_visited',
+  //       })
+  //     );
+
+  //     await this.aqRepo.save(newAq);
+  //   }
+
+  //   // Refresh questions with all relations again
+  //   applicantQuestions = await this.aqRepo.find({
+  //     where: {
+  //       applicant: { id: applicantId },
+  //       test_attempt: { id: attemptId },
+  //     },
+  //     relations: ['mcq_question', 'mcq_question.options'],
+  //   });
+
+  //   // Sort: answered first, then skipped, then not_visited
+  //   applicantQuestions.sort((a, b) => {
+  //     const order = { answered: 0, skipped: 1, not_visited: 2 };
+  //     return order[a.status] - order[b.status];
+  //   });
+
+
+  //   const resumeFrom = applicantQuestions.find(
+  //     (q) => q.status === 'not_visited' || q.status === 'skipped'
+  //   );
+
+  //   return {
+  //     questions: applicantQuestions.map((q) => ({
+  //       id: q.id,
+  //       status: q.status,
+  //       selectedOptionId: q.selected_option?.id ?? null,
+  //       editable: q.status === 'not_visited' || q.status === 'skipped',
+  //       mcq_question: q.mcq_question,
+  //     })),
+  //     lastSeenQuestion: resumeFrom?.mcq_question ?? null,
+  //     attemptCount: attempt.attempt_count,
+  //   };
+  // }
+
+   async resumeTest(applicantId: string, attemptId: string) {
+  const attempt = await this.attemptRepo.findOne({
+    where: { id: attemptId },
+    relations: [
+      'applicant',
+      'applicant.experience_level',
+      'applicant.primary_skill',
+      'applicant.secondary_skill',
+    ],
+  });
+ 
+  if (!attempt) throw new NotFoundException('Test attempt not found');
+  if (attempt.test_status === 'completed') {
+    throw new BadRequestException('Test has already been submitted');
+  }
+ 
+  attempt.attempt_count = attempt.attempt_count ?? 1;
+  if (attempt.attempt_count >= 3) {
+    throw new BadRequestException('Max resume attempts exceeded');
+  }
+ 
+  attempt.attempt_count += 1;
+  attempt.test_status = 'attending';
+  if (!attempt.actual_applicant_answered_at) {
+    attempt.actual_applicant_answered_at = new Date();
+  }
+  await this.attemptRepo.save(attempt);
+ 
+  // STEP 1: Get all current question IDs before removing any
+  const existingQuestions = await this.aqRepo.find({
+    where: {
+      applicant: { id: applicantId },
+      test_attempt: { id: attemptId },
+    },
+    relations: ['mcq_question'],
+  });
+  const excludeQuestionIds = existingQuestions.map(q => q.mcq_question.id);
+ 
+  // STEP 2: Load all applicant questions fully
+  let applicantQuestions = await this.aqRepo.find({
+    where: {
+      applicant: { id: applicantId },
+      test_attempt: { id: attemptId },
+    },
+    relations: ['mcq_question', 'mcq_question.options', 'mcq_question.skill'],
+    order: { id: 'ASC' },
+  });
+ 
+  // STEP 3: Replace first not_visited question (security improvement)
+  if (attempt.attempt_count > 1) {
+    const firstUnvisited = applicantQuestions.find((q) => q.status === 'not_visited');
+ 
+    if (firstUnvisited) {
+      const { skill, difficulty } = firstUnvisited.mcq_question;
+      await this.aqRepo.remove([firstUnvisited]);
+ 
+      const newQuestion = await this.evaluationService.getOneNewQuestionWithSameDifficulty(
+        skill.id,
+        difficulty,
+        attemptId,
+        excludeQuestionIds
+      );
+ 
+      if (newQuestion) {
+        const newAQ = this.aqRepo.create({
           applicant: { id: applicantId },
           test_attempt: { id: attemptId },
-          mcq_question: question,
+          mcq_question: newQuestion,
           status: 'not_visited',
-        })
-      );
-
-      await this.aqRepo.save(newAq);
+        });
+        await this.aqRepo.save(newAQ);
+        excludeQuestionIds.push(newQuestion.id); // Add to excluded list
+      }
     }
-
-    // Refresh questions with all relations again
-    applicantQuestions = await this.aqRepo.find({
-      where: {
+  }
+ 
+  // STEP 4: Replace all skipped questions
+  const skipped = applicantQuestions.filter((q) => q.status === 'skipped');
+ 
+  if (skipped.length > 0) {
+    const skippedInfo = skipped.map((q) => ({
+      difficulty: q.mcq_question.difficulty as 'easy' | 'medium' | 'hard',
+      skillId: q.mcq_question.skill.id,
+    }));
+ 
+    await this.aqRepo.remove(skipped);
+ 
+    const newQuestions: McqQuestion[] = [];
+ 
+    for (const { skillId, difficulty } of skippedInfo) {
+      const newQ = await this.evaluationService.getOneNewQuestionWithSameDifficulty(
+        skillId,
+        difficulty,
+        attemptId,
+        excludeQuestionIds
+      );
+ 
+      if (newQ) {
+        newQuestions.push(newQ);
+        excludeQuestionIds.push(newQ.id); // Track new ID
+      }
+    }
+ 
+    const newAq = newQuestions.map((question) =>
+      this.aqRepo.create({
         applicant: { id: applicantId },
         test_attempt: { id: attemptId },
-      },
-      relations: ['mcq_question', 'mcq_question.options'],
-    });
-
-    // Sort: answered first, then skipped, then not_visited
-    applicantQuestions.sort((a, b) => {
-      const order = { answered: 0, skipped: 1, not_visited: 2 };
-      return order[a.status] - order[b.status];
-    });
-
-
-    const resumeFrom = applicantQuestions.find(
-      (q) => q.status === 'not_visited' || q.status === 'skipped'
+        mcq_question: question,
+        status: 'not_visited',
+      })
     );
-
-    return {
-      questions: applicantQuestions.map((q) => ({
-        id: q.id,
-        status: q.status,
-        selectedOptionId: q.selected_option?.id ?? null,
-        editable: q.status === 'not_visited' || q.status === 'skipped',
-        mcq_question: q.mcq_question,
-      })),
-      lastSeenQuestion: resumeFrom?.mcq_question ?? null,
-      attemptCount: attempt.attempt_count,
-    };
+ 
+    await this.aqRepo.save(newAq);
   }
+ 
+  // STEP 5: Reload all questions
+  applicantQuestions = await this.aqRepo.find({
+    where: {
+      applicant: { id: applicantId },
+      test_attempt: { id: attemptId },
+    },
+    relations: ['mcq_question', 'mcq_question.options'],
+  });
+ 
+  // Sort: answered → skipped → not_visited
+  applicantQuestions.sort((a, b) => {
+    const order = { answered: 0, skipped: 1, not_visited: 2 };
+    return order[a.status] - order[b.status];
+  });
+ 
+  const resumeFrom = applicantQuestions.find(
+    (q) => q.status === 'not_visited' || q.status === 'skipped'
+  );
+ 
+  return {
+    questions: applicantQuestions.map((q) => ({
+      id: q.id,
+      status: q.status,
+      selectedOptionId: q.selected_option?.id ?? null,
+      editable: q.status === 'not_visited' || q.status === 'skipped',
+      mcq_question: q.mcq_question,
+    })),
+    lastSeenQuestion: resumeFrom?.mcq_question ?? null,
+    attemptCount: attempt.attempt_count,
+  };
+}
 
   // 3. Save or Update Answer
   async saveAnswer(

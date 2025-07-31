@@ -1,4 +1,4 @@
-import './MeetOurTeam.css';
+import './css/MeetOurTeam.css';
 
 const teamMembers = [
   {

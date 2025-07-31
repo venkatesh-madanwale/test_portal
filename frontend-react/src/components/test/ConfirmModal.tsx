@@ -1,4 +1,4 @@
-import './ConfirmModal.css';
+import "../css/ConfirmModal.css"
 
 interface ConfirmModalProps {
   answeredCount: number;
