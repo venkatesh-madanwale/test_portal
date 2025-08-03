@@ -4,9 +4,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ExperienceLevel } from './experience_levels.entity';
+import { Malpractice } from 'src/malpractice/entities/malpractice.entity';
 
 @Entity('applicant')
 export class Applicant {
@@ -33,4 +35,9 @@ export class Applicant {
   @ManyToOne(() => Skill)
   @JoinColumn({ name: 'secondary_skill_id' })
   secondary_skill: Skill;
+
+  @OneToMany(() => Malpractice, (malpractice) => malpractice.applicant, {
+    cascade: true,
+  })
+  malpractice: Malpractice[];
 }

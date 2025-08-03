@@ -10,6 +10,6 @@ import { Applicant } from 'src/evaluation/entities/applicants.entity';
   imports: [TypeOrmModule.forFeature([Malpractice, Applicant])],
   controllers: [MalpracticeController],
   providers: [MalpracticeService, CloudinaryService],
-  exports: [MalpracticeService]
+  exports: [MalpracticeService],
 })
 export class MalpracticeModule {}

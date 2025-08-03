@@ -25,6 +25,9 @@ import {
   setAnswer,
   decrementTime
 } from "../../redux/slices/test/testSlice";
+import Navbar from "./ProctorApp/Navbar";
+import Alerts from "./ProctorApp/Alerts";
+import ProctorApp from "./ProctorApp/ProctorApp";
 
 const formatTime = (sec: number) => {
   const m = Math.floor(sec / 60).toString().padStart(2, "0");
@@ -34,6 +37,11 @@ const formatTime = (sec: number) => {
 
 const TestPage = () => {
   const { token, applicantId, attemptId } = useParams();
+
+  if (applicantId !== undefined) {
+    localStorage.setItem("applicantId", applicantId.toString());
+  }
+
   const dispatch = useDispatch<any>();
   const handle = useFullScreenHandle();
 
@@ -149,6 +157,11 @@ const TestPage = () => {
 
   return (
     <>
+      {/* Navbar */}
+      <Navbar />
+      <Alerts />
+      <ProctorApp />
+
 
       {/* // Main container */}
       <div className="main-container">
@@ -180,7 +193,6 @@ const TestPage = () => {
                   Start Test
                 </button>
               </div>
-
 
 
 

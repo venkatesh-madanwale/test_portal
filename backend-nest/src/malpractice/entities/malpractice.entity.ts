@@ -1,42 +1,23 @@
-// import { Applicant } from 'src/evaluation/entities/test_attempt.entity';
-// import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-
-// @Entity('malpractice')
-// export class Malpractice {
-//   @PrimaryGeneratedColumn()
-//   id: number;
-
-//   @ManyToOne(() => Applicant)
-//   @JoinColumn({ name: 'applicant_id' })
-//   applicantId: string;
-
-//   @Column({ name: 'profile_image_url', nullable: true })
-//   profileImageUrl: string;
-
-//   @Column({ name: 'alert_message', nullable: true })
-//   alertMessage: string;
-
-//   @Column({ name: 'malpractice_image_url', nullable: true })
-//   malpracticeImageUrl: string;
-
-//   @Column({ name: 'timestamp', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-//   timestamp: Date;
-// }
-
-
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
 } from 'typeorm';
+import { Applicant } from 'src/evaluation/entities/applicants.entity';
 
-@Entity('malpractice')
+@Entity('malpractices')
 export class Malpractice {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ name: 'applicant_id' })
-  applicantId: string;
+  @ManyToOne(() => Applicant, (applicant) => applicant.malpractice, {
+    eager: false,
+  })
+  @JoinColumn({ name: 'applicant_id' })
+  applicant: Applicant;
 
   @Column({ name: 'profile_image_url', nullable: true })
   profileImageUrl: string;
@@ -47,10 +28,6 @@ export class Malpractice {
   @Column({ name: 'malpractice_image_url', nullable: true })
   malpracticeImageUrl: string;
 
-  @Column({
-    name: 'timestamp',
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
+  @CreateDateColumn({ name: 'timestamp' })
   timestamp: Date;
 }

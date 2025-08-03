@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Malpractice } from './entities/malpractice.entity';
@@ -9,7 +9,6 @@ export class MalpracticeService {
   constructor(
     @InjectRepository(Malpractice)
     private readonly repo: Repository<Malpractice>,
-
     @InjectRepository(Applicant)
     private readonly applicantRepo: Repository<Applicant>,
   ) {}
@@ -17,21 +16,22 @@ export class MalpracticeService {
   async registerCandidate(data: {
     applicantId: string;
     profileImageUrl: string;
-  }): Promise<Malpractice> {
+  }) {
     const applicant = await this.applicantRepo.findOne({
       where: { id: data.applicantId },
     });
 
     if (!applicant) {
-      throw new BadRequestException('Applicant does not exist');
+      throw new BadRequestException('Applicant not found');
     }
 
-    const malpractice = this.repo.create({
-      applicantId: data.applicantId,
+    // Initial record with profile image (alerts null)
+    const record = this.repo.create({
+      applicant,
       profileImageUrl: data.profileImageUrl,
     });
 
-    return this.repo.save(malpractice);
+    return this.repo.save(record);
   }
 
   async addAlert(data: {
@@ -39,108 +39,24 @@ export class MalpracticeService {
     alertMessage: string;
     malpracticeImageUrl: string;
   }): Promise<Malpractice> {
-    const existing = await this.repo.findOne({
-      where: { applicantId: data.applicantId },
-      order: { timestamp: 'DESC' },
+    // Find the first record for profile reference
+    const profileRecord = await this.repo.findOne({
+      where: { applicant: { id: data.applicantId } },
+      order: { timestamp: 'ASC' },
+      relations: ['applicant'],
     });
 
-    if (!existing) {
-      throw new NotFoundException('Candidate not found - please register first');
+    if (!profileRecord) {
+      throw new BadRequestException('Candidate not registered');
     }
 
-    const alert = this.repo.create({
-      applicantId: data.applicantId,
-      profileImageUrl: existing.profileImageUrl,
+    const alertRecord = this.repo.create({
+      applicant: { id: data.applicantId } as Applicant,
+      profileImageUrl: profileRecord.profileImageUrl,
       alertMessage: data.alertMessage,
       malpracticeImageUrl: data.malpracticeImageUrl,
-      timestamp: new Date(),
     });
 
-    return this.repo.save(alert);
-  }
-
-  async findByApplicantId(applicantId: string): Promise<Malpractice[]> {
-    return this.repo.find({
-      where: { applicantId },
-      order: { timestamp: 'DESC' },
-    });
+    return this.repo.save(alertRecord);
   }
 }
-
-
-
-
-
-
-
-
-// import { BadRequestException, Injectable } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Repository } from 'typeorm';
-// import { Malpractice } from './entities/malpractice.entity';
-// import { Applicant } from 'src/evaluation/entities/test_attempt.entity';
-
-// @Injectable()
-// export class MalpracticeService {
-//   constructor(
-//     @InjectRepository(Malpractice)
-//     private readonly repo: Repository<Malpractice>,
-
-//     @InjectRepository(Applicant)
-//     private readonly applicantRepo: Repository<Applicant>,
-//   ) { }
-
-//   async registerCandidate(data: {
-//     applicantId: string;
-//     profileImageUrl: string;
-//   }): Promise<Malpractice> {
-//     const existing = await this.applicantRepo.findOne({
-//       where: { id: data.applicantId },
-//     });
-
-//     if (!existing) {
-//       throw new BadRequestException('User is not exists')
-//     }
-
-//     const malpracticeRecord = this.repo.create({
-//       applicantId: existing.id,
-//       profileImageUrl: data.profileImageUrl
-//     });
-
-//     return await this.repo.save(malpracticeRecord);
-//   }
-
-//   async addAlert(data: {
-//     applicantId: string;
-//     alertMessage: string;
-//     malpracticeImageUrl: string;
-//   }): Promise<Malpractice> {
-//     // Find the most recent candidate record
-//     const candidateRecord = await this.repo.findOne({
-//       where: { applicantId: data.applicantId },
-
-//     });
-
-//     if (!candidateRecord) {
-//       throw new Error('Candidate not found - register first');
-//     }
-
-//     // Create new alert record
-//     const alertRecord = this.repo.create({
-//       applicantId: data.applicantId,
-//       profileImageUrl: candidateRecord.profileImageUrl, // Keep reference to profile
-//       alertMessage: data.alertMessage,
-//       malpracticeImageUrl: data.malpracticeImageUrl,
-//       timestamp: new Date(),
-//     });
-
-//     return this.repo.save(alertRecord);
-//   }
-
-//   async findByApplicantId(applicantId: string): Promise<Malpractice[]> {
-//     return this.repo.find({
-//       where: { applicantId },
-//       order: { timestamp: 'DESC' },
-//     });
-//   }
-// }
