@@ -1,6 +1,6 @@
 /* Navbar.css */
 
-.navbar {
+.navbarr {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -14,14 +14,14 @@
   z-index: 1000;
 }
 
-.navbar-title {
+.navbarr-title {
   font-size: 24px;
   font-weight: 600;
   letter-spacing: 0.5px;
   margin: 0;
 }
 
-.navbar-right {
+.navbarr-right {
   display: flex;
   align-items: center;
   gap: 10px;
