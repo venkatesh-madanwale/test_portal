@@ -1,0 +1,18 @@
+.question {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem;
+}
+
+.question-button {
+  padding: 10px 20px;
+  background-color: green;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.question-button:hover {
+  background-color: green;
+}

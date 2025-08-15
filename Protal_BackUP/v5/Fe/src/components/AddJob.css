@@ -1,0 +1,146 @@
+/* Container layout */
+.add-job-container {
+  max-width: 800px;
+  margin: 1rem auto;
+  padding: 1rem;
+  position: relative;
+}
+
+/* Top-right upload button */
+.upload-btn-container {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.upload-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.upload-btn:hover {
+  background-color: #1f8c3c;
+}
+
+/* Title */
+.add-job-title {
+  font-size: 1.8rem;
+  color: #158c2b;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+/* Form layout */
+.job-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.job-form input {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: none;
+  border-bottom: 2px solid #ccc;
+  background-color: #f7f7f7;
+  transition: border-color 0.3s ease;
+}
+
+.job-form input:focus {
+  outline: none;
+  border-color: #28a745;
+  background-color: #fff;
+}
+
+/* Submit Button */
+.submit-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #1f8c3c;
+}
+
+
+/* .add-job-container {
+  max-width: 500px;
+  margin: 3rem auto;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.upload-btn-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 1.5rem;
+}
+
+.upload-btn {
+  padding: 10px 16px;
+  background-color: #28c25c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.upload-btn:hover {
+  background-color: #1ba347;
+}
+
+.add-job-title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.job-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.job-form input {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.submit-btn {
+  padding: 12px 32px;
+  font-size: 1rem;
+  background-color: #28c25c;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #1ba347;
+} */
+
